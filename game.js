@@ -90,6 +90,7 @@ function draw_tiles(grid_size, cell_size)
         for (j = 0; j < grid_size; j += cell_size)
         {
             let cell = cells[x][y][0]
+            let rot  = cells[x][y][1]
 
             Object.keys(blocks).forEach(key => {
                 if (cell == blocks[key].letter)
@@ -97,6 +98,8 @@ function draw_tiles(grid_size, cell_size)
                     c.fillStyle = blocks[key].color
                 }
             })
+            
+            
 
             c.fillRect(i, j, cell_size, cell_size)
             y += 1
@@ -126,7 +129,7 @@ function update(grid_size, cell_size)
         {
             for (let j = 0; j < grid_size; j += cell_size) 
             {
-                cells[x][y] = ["F", "up"]
+                cells[x][y] = ["F", 1]
                 y += 1
             }
             y = 0
