@@ -3,6 +3,45 @@ var c = canvas.getContext("2d")
 var g_size = 640
 var c_size = 32
 
+var rotation = 1
+var blocks =
+{
+    def_block: {
+        letter: "D",
+        color: "blueviolet"
+    },
+    free_block: {
+        letter: "F",
+        color: "darkgreen"
+    },
+    pink_block: {
+        letter: "H",
+        color: "pink"
+    },
+    blue_block: {
+        letter: "B",
+        color: "blue"
+    }
+}
+
+var inv = document.getElementById("select")
+
+var c_block = document.createElement("div")
+c_block.className = "inv"
+c_block.onclick = s_c_block
+inv.appendChild(c_block)
+
+var rotation_state = document.createElement("span")
+rotation_state.innerHTML = rotation
+rotation_state.className = "inv"
+inv.appendChild(rotation_state)
+
+var current_block = blocks.def_block
+
+function s_c_block() {
+    console.log("clcick", current_block)
+    current_block = blocks.pink_block
+}
 
 function line(x, y, x1, x2) 
 {
@@ -16,9 +55,9 @@ function line(x, y, x1, x2)
 var cells = []
 /* cells = 
 [
-    [state, state, state], row 1
-    [state, state, state], row 2
-    [state, state, state]  row 3
+    [
+        [state, rotation],
+    ],
 ] */
 
 var colors = 
@@ -50,20 +89,14 @@ function draw_tiles(grid_size, cell_size)
     {
         for (j = 0; j < grid_size; j += cell_size)
         {
-            let cell = cells[x][y]
+            let cell = cells[x][y][0]
 
-            if (cell == "F") 
-            {
-                c.fillStyle = colors.free
-            } 
-            else if (cell == "B") 
-            {
-                c.fillStyle = colors.blocked
-            }
-            else if (cell == "H")
-            {
-                c.fillStyle = colors.hover
-            }
+            Object.keys(blocks).forEach(key => {
+                if (cell == blocks[key].letter)
+                {
+                    c.fillStyle = blocks[key].color
+                }
+            })
 
             c.fillRect(i, j, cell_size, cell_size)
             y += 1
@@ -93,7 +126,7 @@ function update(grid_size, cell_size)
         {
             for (let j = 0; j < grid_size; j += cell_size) 
             {
-                cells[x][y] = `F`
+                cells[x][y] = ["F", "up"]
                 y += 1
             }
             y = 0
@@ -107,18 +140,36 @@ function update(grid_size, cell_size)
 
 canvas.addEventListener("click", function(e)
 {
-    cell_x = Math.floor(e.x/c_size)
-    cell_y = Math.floor(e.y/c_size)
+    cell_x = Math.floor(e.offsetX/c_size)
+    cell_y = Math.floor(e.offsetY/c_size)
 
-    cells[cell_x][cell_y] = `B`
+    console.log(e.offsetX, e.offsetY)
 
-    c.fillStyle = colors.blocked
+    cells[cell_x][cell_y] = [current_block.letter, rotation]
+
+    c.fillStyle = current_block.color
     c.fillRect(cell_x * c_size, cell_y * c_size, c_size, c_size)
 
-    draw_grid(g_size, c_size)
+    update(g_size, c_size)
 })
 
-var last_x = 99
+window.addEventListener("keydown", function (e)
+{
+    if (e.key === "r")
+    {
+        if (rotation < 4) 
+        {
+            rotation++
+        } 
+        else 
+        {
+            rotation = 1
+        }
+    }
+    rotation_state.innerHTML = rotation
+})
+
+/* var last_x = 99
 var last_y = 99
 
 canvas.addEventListener("mousemove", function(e) 
@@ -140,7 +191,7 @@ canvas.addEventListener("mousemove", function(e)
         last_x = cell_x
         last_y = cell_y
 
-        c.fillStyle = colors.hover
+        c.fillStyle = current_block.color
         c.fillRect(cell_x * c_size, cell_y * c_size, c_size, c_size)
 
         draw_grid(g_size, c_size)
@@ -157,6 +208,6 @@ canvas.addEventListener("mousemove", function(e)
             }
         }
     } 
-})
+}) */
 
 setInterval(update(g_size, c_size), 10)

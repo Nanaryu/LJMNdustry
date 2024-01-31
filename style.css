@@ -1,0 +1,9 @@
+.inv
+{
+    width: 180px;
+    height: 180px;
+    background-color: blue;
+    margin-left: 10px;
+    margin-top: 10px;
+    border-spacing: 10px;
+}
