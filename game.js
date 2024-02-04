@@ -51,6 +51,14 @@ function line(x, y, x1, x2)
     c.stroke()
 }
 
+function text(txt, x, y)
+{
+    c.font = "24px Arial"
+    c.fillStyle = "black"
+    c.textAlign = "center"
+    c.fillText(txt, x, y)
+}
+
 
 var cells = []
 /* cells = 
@@ -100,8 +108,9 @@ function draw_tiles(grid_size, cell_size)
             })
             
             
-
+    
             c.fillRect(i, j, cell_size, cell_size)
+            text(rot, i+cell_size/2, j+cell_size/2)
             y += 1
         }
         y = 0
