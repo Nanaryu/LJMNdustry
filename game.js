@@ -1,7 +1,7 @@
 var canvas = document.getElementById("grid")
 var c = canvas.getContext("2d")
 var g_size = 640
-var c_size = 32
+var c_size = 128
 
 var rotation = 1
 var blocks =
@@ -24,6 +24,13 @@ var blocks =
     }
 }
 
+var rotdecode = {
+    1: "↑",
+    2: "→",
+    3: "↓",
+    4: "←"
+}
+
 var inv = document.getElementById("select")
 
 var c_block = document.createElement("div")
@@ -31,10 +38,10 @@ c_block.className = "inv"
 c_block.onclick = s_c_block
 inv.appendChild(c_block)
 
-var rotation_state = document.createElement("span")
-rotation_state.innerHTML = rotation
-rotation_state.className = "inv"
-inv.appendChild(rotation_state)
+var r_state = document.createElement("span")
+r_state.innerHTML = rotdecode[rotation]
+r_state.id = "r_state"
+inv.appendChild(r_state)
 
 var current_block = blocks.def_block
 
@@ -53,12 +60,11 @@ function line(x, y, x1, x2)
 
 function text(txt, x, y)
 {
-    c.font = "24px Arial"
+    c.font = "32px Arial"
     c.fillStyle = "black"
     c.textAlign = "center"
-    c.fillText(txt, x, y)
+    c.fillText(txt, x, y+7)
 }
-
 
 var cells = []
 /* cells = 
@@ -103,14 +109,13 @@ function draw_tiles(grid_size, cell_size)
             Object.keys(blocks).forEach(key => {
                 if (cell == blocks[key].letter)
                 {
-                    c.fillStyle = blocks[key].color
+                    // choose color based on color code of current block
+                    c.fillStyle = blocks[key].color 
                 }
             })
             
-            
-    
-            c.fillRect(i, j, cell_size, cell_size)
-            text(rot, i+cell_size/2, j+cell_size/2)
+            c.fillRect(i, j, cell_size, cell_size) // background 
+            text(rotdecode[rot], i+cell_size/2, j+cell_size/2) // arrow text in cell
             y += 1
         }
         y = 0
@@ -155,8 +160,6 @@ canvas.addEventListener("click", function(e)
     cell_x = Math.floor(e.offsetX/c_size)
     cell_y = Math.floor(e.offsetY/c_size)
 
-    console.log(e.offsetX, e.offsetY)
-
     cells[cell_x][cell_y] = [current_block.letter, rotation]
 
     c.fillStyle = current_block.color
@@ -178,7 +181,7 @@ window.addEventListener("keydown", function (e)
             rotation = 1
         }
     }
-    rotation_state.innerHTML = rotation
+    r_state.innerHTML = rotdecode[rotation]
 })
 
 /* var last_x = 99

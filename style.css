@@ -7,3 +7,14 @@
     margin-top: 10px;
     border-spacing: 10px;
 }
+#r_state 
+{
+    margin-left: 70px;
+    margin-top: 70px;
+    width: 60px;
+    height: 60px;
+    background-color: aliceblue;
+    position:absolute;
+    font-size: 50px;
+    text-align: center;
+}
