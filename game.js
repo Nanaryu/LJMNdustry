@@ -1,7 +1,7 @@
 var canvas = document.getElementById("grid")
 var c = canvas.getContext("2d")
 var g_size = 640
-var c_size = 128
+var c_size = 64
 
 var rotation = 1
 var blocks =
@@ -61,7 +61,7 @@ function line(x, y, x1, x2)
 function text(txt, x, y)
 {
     c.font = "32px Arial"
-    c.fillStyle = "black"
+    c.fillStyle = "white"
     c.textAlign = "center"
     c.fillText(txt, x, y+7)
 }
@@ -115,7 +115,36 @@ function draw_tiles(grid_size, cell_size)
             })
             
             c.fillRect(i, j, cell_size, cell_size) // background 
-            text(rotdecode[rot], i+cell_size/2, j+cell_size/2) // arrow text in cell
+            if (cell == "D") 
+            {
+                text(rotdecode[rot], i+cell_size/2, j+cell_size/2) // arrow text in cell
+            }
+            y += 1
+        }
+        y = 0
+        x += 1
+    }
+}
+
+function calcPath() 
+{
+    let x = 0
+    let y = 0
+
+    for (i = 0; i < grid_size; i += cell_size) 
+    {
+        for (j = 0; j < grid_size; j += cell_size)
+        {
+            let cell = cells[x][y][0]
+            let rot  = cells[x][y][1]
+            
+            if (cell == "D") {
+                if (rot == 1)
+                {
+                    
+                }
+            }
+
             y += 1
         }
         y = 0
@@ -225,4 +254,6 @@ canvas.addEventListener("mousemove", function(e)
     } 
 }) */
 
-setInterval(update(g_size, c_size), 10)
+setInterval(() => {
+    update(g_size, c_size)
+}, 10)
