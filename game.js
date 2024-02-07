@@ -36,13 +36,13 @@ function velocity(x, y, rot)
     switch(rot)
     {
         case 1:
-            return [x, y+1]
+            return [x, y-c_size]
         case 2:
-            return [x+1, y]
+            return [x+c_size, y]
         case 3:
-            return [x, y-1]
+            return [x, y+c_size]
         case 4:
-            return [x-1, y]
+            return [x-c_size, y]
     }
 }
 
@@ -53,19 +53,50 @@ class Orb
         this.x = x
         this.y = y
         this.r = r
+        this.moving = false
+        this.dx = x
+        this.dy = y
     }
 
     move_c() 
     {
-        this.cell_x = Math.floor(this.x/c_size)
-        this.cell_y = Math.floor(this.y/c_size)
-
-        if (cells[cell_x][cell_y][0] == "D")
+        if (!this.moving) 
         {
-            let xy = velocity(this.x, this.y, cells[cell_x][cell_y][1])
-            this.x = xy[0]
-            this.y = xy[1]
+            this.cell_x = Math.floor(this.x/c_size)
+            this.cell_y = Math.floor(this.y/c_size)
+    
+            if (cells[this.cell_x][this.cell_y][0] == "D")
+            {
+                let xy = velocity(this.x, this.y, cells[this.cell_x][this.cell_y][1])
+                this.dx = xy[0]
+                this.dy = xy[1]
+                this.moving = true
+            }
+        }
+        else
+        {
+            if (this.x < this.dx)
+            {
+                this.x += 1
+            }
+            else if (this.x > this.dx)
+            {
+                this.x -= 1
+            }
+            if (this.y < this.dy)
+            {
+                this.y += 1
+            }
+            else if (this.y > this.dy)
+            {
+                this.y -= 1
+            }
+            c.fillStyle = "red"
             circle(this.x, this.y, this.r)
+            if (this.x == this.dx && this.y == this.dy)
+            {
+                this.moving = false
+            }
         }
     }
 }
@@ -275,7 +306,6 @@ function update(grid_size, cell_size)
     }
     /// UPDATING
     draw_tiles(grid_size, cell_size)
-    calcPath()
     updateOrbPos()
     draw_grid(grid_size, cell_size)
 }
@@ -305,9 +335,14 @@ window.addEventListener("keydown", function (e)
         {
             rotation = 1
         }
+        r_state.innerHTML = rotdecode[rotation]
     }
-    r_state.innerHTML = rotdecode[rotation]
+    else if (e.key === "e")
+    {
+        calcPath()
+    }
 })
+
 
 /* var last_x = 99
 var last_y = 99
