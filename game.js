@@ -15,7 +15,7 @@ var blocks =
         color: "darkgreen"
     },
     pink_block: {
-        letter: "H",
+        letter: "P",
         color: "pink"
     },
     blue_block: {
@@ -29,6 +29,45 @@ var rotdecode = {
     2: "→",
     3: "↓",
     4: "←"
+}
+
+function velocity(x, y, rot)
+{
+    switch(rot)
+    {
+        case 1:
+            return [x, y+1]
+        case 2:
+            return [x+1, y]
+        case 3:
+            return [x, y-1]
+        case 4:
+            return [x-1, y]
+    }
+}
+
+class Orb 
+{
+    constructor (x, y, r)
+    {
+        this.x = x
+        this.y = y
+        this.r = r
+    }
+
+    move_c() 
+    {
+        this.cell_x = Math.floor(this.x/c_size)
+        this.cell_y = Math.floor(this.y/c_size)
+
+        if (cells[cell_x][cell_y][0] == "D")
+        {
+            let xy = velocity(this.x, this.y, cells[cell_x][cell_y][1])
+            this.x = xy[0]
+            this.y = xy[1]
+            circle(this.x, this.y, this.r)
+        }
+    }
 }
 
 var inv = document.getElementById("select")
@@ -45,9 +84,15 @@ inv.appendChild(r_state)
 
 var current_block = blocks.def_block
 
+let s_c = true
 function s_c_block() {
-    console.log("clcick", current_block)
-    current_block = blocks.pink_block
+    if (s_c) {
+        s_c = false
+        current_block = blocks.pink_block
+    } else {
+        current_block = blocks.def_block
+        s_c = true
+    }
 }
 
 function line(x, y, x1, x2) 
@@ -64,6 +109,14 @@ function text(txt, x, y)
     c.fillStyle = "white"
     c.textAlign = "center"
     c.fillText(txt, x, y+7)
+}
+
+function circle(x, y, radius)
+{
+    c.beginPath()
+    c.arc(x, y, radius, 0, Math.PI*2, false)
+    c.fill()
+    c.closePath()
 }
 
 var cells = []
@@ -125,23 +178,56 @@ function draw_tiles(grid_size, cell_size)
         x += 1
     }
 }
+const orbs = []
 
 function calcPath() 
 {
     let x = 0
     let y = 0
 
-    for (i = 0; i < grid_size; i += cell_size) 
+    for (i = 0; i < g_size; i += c_size) 
     {
-        for (j = 0; j < grid_size; j += cell_size)
+        for (j = 0; j < g_size; j += c_size)
         {
             let cell = cells[x][y][0]
             let rot  = cells[x][y][1]
             
-            if (cell == "D") {
-                if (rot == 1)
+            if (cell == "P") {
+                c.fillStyle = "red"
+
+                let ii = (c_size/2)+i
+                let jj = (c_size/2)+j
+
+                if (x !=  g_size / c_size + 1)
                 {
-                    
+                    if (cells[x+1][y][0] == "D") // right
+                    {
+                        orbs.push(new Orb(ii+c_size, jj, c_size/8))
+                    }
+                }
+                
+                if (x != 0)
+                {
+                    if (cells[x-1][y][0] == "D") // left
+                    {
+                        orbs.push(new Orb(ii-c_size, jj, c_size/8))
+                    }
+                }
+            
+                if (y != g_size / c_size + 1)
+                {
+                    if (cells[x][y+1][0] == "D") // up
+                    {
+                        orbs.push(new Orb(ii, jj+c_size, c_size/8))
+                    }
+                }
+
+                if (y != 0) 
+                {
+                    if (cells[x][y-1][0] == "D") // down
+                    {
+                        orbs.push(new Orb(ii, jj-c_size, c_size/8))
+                    }   
                 }
             }
 
@@ -150,6 +236,14 @@ function calcPath()
         y = 0
         x += 1
     }
+}
+
+function updateOrbPos()
+{
+    orbs.forEach(orb => 
+    {
+        orb.move_c()
+    })
 }
 
 function update(grid_size, cell_size) 
@@ -181,6 +275,8 @@ function update(grid_size, cell_size)
     }
     /// UPDATING
     draw_tiles(grid_size, cell_size)
+    calcPath()
+    updateOrbPos()
     draw_grid(grid_size, cell_size)
 }
 

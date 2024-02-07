@@ -7,6 +7,12 @@
     margin-top: 10px;
     border-spacing: 10px;
 }
+
+.inv:active
+{
+    background-color: pink;
+}
+
 #r_state 
 {
     margin-left: 70px;
