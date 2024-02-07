@@ -48,14 +48,14 @@ function velocity(x, y, rot)
 
 class Orb 
 {
-    constructor (x, y, r)
+    constructor (x, y, r, dx=x, dy=y, moving=false)
     {
         this.x = x
         this.y = y
         this.r = r
-        this.moving = false
-        this.dx = x
-        this.dy = y
+        this.moving = moving
+        this.dx = dx
+        this.dy = dy
     }
 
     move_c() 
@@ -64,14 +64,20 @@ class Orb
         {
             this.cell_x = Math.floor(this.x/c_size)
             this.cell_y = Math.floor(this.y/c_size)
-    
-            if (cells[this.cell_x][this.cell_y][0] == "D")
+
+            if (this.cell_x < cells[0].length && this.cell_y < cells[0].length)
             {
-                let xy = velocity(this.x, this.y, cells[this.cell_x][this.cell_y][1])
-                this.dx = xy[0]
-                this.dy = xy[1]
-                this.moving = true
+                if (cells[this.cell_x][this.cell_y][0] == "D")
+                {
+                    let xy = velocity(this.x, this.y, cells[this.cell_x][this.cell_y][1])
+                    this.dx = xy[0]
+                    this.dy = xy[1]
+                    this.moving = true
+                }
+                c.fillStyle = "red"
+                circle(this.x, this.y, this.r)
             }
+            
         }
         else
         {
@@ -101,30 +107,21 @@ class Orb
     }
 }
 
+var current_block = blocks.def_block
+
 var inv = document.getElementById("select")
 
 var c_block = document.createElement("div")
 c_block.className = "inv"
-c_block.onclick = s_c_block
+c_block.onclick = function () {current_block = blocks.pink_block}
 inv.appendChild(c_block)
 
 var r_state = document.createElement("span")
 r_state.innerHTML = rotdecode[rotation]
 r_state.id = "r_state"
+r_state.onclick = function () {current_block = blocks.def_block}
 inv.appendChild(r_state)
 
-var current_block = blocks.def_block
-
-let s_c = true
-function s_c_block() {
-    if (s_c) {
-        s_c = false
-        current_block = blocks.pink_block
-    } else {
-        current_block = blocks.def_block
-        s_c = true
-    }
-}
 
 function line(x, y, x1, x2) 
 {
@@ -165,27 +162,32 @@ var colors =
     hover: "blue"
 }
 
-function draw_grid(grid_size, cell_size) 
-{
-    for (i = 0; i < grid_size ; i += cell_size) 
-    {
-        line(0, i, grid_size, i) // horizontal lines
 
-        for (j = 0; j < grid_size; j += cell_size) 
+
+
+function draw_grid() 
+{
+    for (i = 0; i < g_size ; i += c_size) 
+    {
+        line(0, i, g_size, i) // horizontal lines
+
+        for (j = 0; j < g_size; j += c_size) 
         {
-            line(j, 0, j, grid_size) // vertical lines
+            line(j, 0, j, g_size) // vertical lines
         }
     }
 }
 
-function draw_tiles(grid_size, cell_size) 
+
+
+function draw_tiles() 
 {
     let x = 0
     let y = 0
 
-    for (i = 0; i < grid_size; i += cell_size) 
+    for (i = 0; i < g_size; i += c_size) 
     {
-        for (j = 0; j < grid_size; j += cell_size)
+        for (j = 0; j < g_size; j += c_size)
         {
             let cell = cells[x][y][0]
             let rot  = cells[x][y][1]
@@ -198,10 +200,10 @@ function draw_tiles(grid_size, cell_size)
                 }
             })
             
-            c.fillRect(i, j, cell_size, cell_size) // background 
+            c.fillRect(i, j, c_size, c_size) // background 
             if (cell == "D") 
             {
-                text(rotdecode[rot], i+cell_size/2, j+cell_size/2) // arrow text in cell
+                text(rotdecode[rot], i+c_size/2, j+c_size/2) // arrow text in cell
             }
             y += 1
         }
@@ -209,9 +211,13 @@ function draw_tiles(grid_size, cell_size)
         x += 1
     }
 }
+
+
+
+
 const orbs = []
 
-function calcPath() 
+function spawnOrb() 
 {
     let x = 0
     let y = 0
@@ -221,7 +227,6 @@ function calcPath()
         for (j = 0; j < g_size; j += c_size)
         {
             let cell = cells[x][y][0]
-            let rot  = cells[x][y][1]
             
             if (cell == "P") {
                 c.fillStyle = "red"
@@ -233,7 +238,7 @@ function calcPath()
                 {
                     if (cells[x+1][y][0] == "D") // right
                     {
-                        orbs.push(new Orb(ii+c_size, jj, c_size/8))
+                        orbs.push(new Orb(ii, jj, c_size/8, ii+c_size, jj, true))
                     }
                 }
                 
@@ -241,7 +246,7 @@ function calcPath()
                 {
                     if (cells[x-1][y][0] == "D") // left
                     {
-                        orbs.push(new Orb(ii-c_size, jj, c_size/8))
+                        orbs.push(new Orb(ii, jj, c_size/8, ii-c_size, jj, true))
                     }
                 }
             
@@ -249,7 +254,7 @@ function calcPath()
                 {
                     if (cells[x][y+1][0] == "D") // up
                     {
-                        orbs.push(new Orb(ii, jj+c_size, c_size/8))
+                        orbs.push(new Orb(ii, jj, c_size/8, ii, jj+c_size, true))
                     }
                 }
 
@@ -257,7 +262,7 @@ function calcPath()
                 {
                     if (cells[x][y-1][0] == "D") // down
                     {
-                        orbs.push(new Orb(ii, jj-c_size, c_size/8))
+                        orbs.push(new Orb(ii, jj, c_size/8, ii, jj-c_size, true))
                     }   
                 }
             }
@@ -277,14 +282,13 @@ function updateOrbPos()
     })
 }
 
-function update(grid_size, cell_size) 
+function init()
 {
-    /// INITIALIZATION
     if (cells.length == 0) 
     {
         let x = 0
         let y = 0
-        let rows = grid_size / cell_size
+        let rows = g_size / c_size
 
         // init cells
         for (let i = 0; i < rows; i += 1) 
@@ -293,9 +297,9 @@ function update(grid_size, cell_size)
         }
 
         // set all cells to free
-        for (let i = 0; i < grid_size; i += cell_size) 
+        for (let i = 0; i < g_size; i += c_size) 
         {
-            for (let j = 0; j < grid_size; j += cell_size) 
+            for (let j = 0; j < g_size; j += c_size) 
             {
                 cells[x][y] = ["F", 1]
                 y += 1
@@ -304,10 +308,13 @@ function update(grid_size, cell_size)
             x += 1
         }
     }
-    /// UPDATING
-    draw_tiles(grid_size, cell_size)
+}
+
+function update() 
+{
+    draw_tiles()
     updateOrbPos()
-    draw_grid(grid_size, cell_size)
+    draw_grid()
 }
 
 canvas.addEventListener("click", function(e)
@@ -320,7 +327,7 @@ canvas.addEventListener("click", function(e)
     c.fillStyle = current_block.color
     c.fillRect(cell_x * c_size, cell_y * c_size, c_size, c_size)
 
-    update(g_size, c_size)
+    update()
 })
 
 window.addEventListener("keydown", function (e)
@@ -339,10 +346,20 @@ window.addEventListener("keydown", function (e)
     }
     else if (e.key === "e")
     {
-        calcPath()
+        spawnOrb()
     }
 })
 
+const animate = () => {
+  requestAnimationFrame(animate)
+
+  c.clearRect(0, 0, canvas.width, canvas.height)
+
+  update()
+}
+
+init()
+animate()
 
 /* var last_x = 99
 var last_y = 99
@@ -384,7 +401,3 @@ canvas.addEventListener("mousemove", function(e)
         }
     } 
 }) */
-
-setInterval(() => {
-    update(g_size, c_size)
-}, 10)

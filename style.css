@@ -1,16 +1,16 @@
 .inv
 {
-    width: 180px;
-    height: 180px;
-    background-color: blue;
-    margin-left: 10px;
-    margin-top: 10px;
+    margin-left: 70px;
+    margin-top: 70px;
+    width: 60px;
+    height: 60px;
+    background-color: pink;
     border-spacing: 10px;
 }
 
 .inv:active
 {
-    background-color: pink;
+    background-color: palevioletred;
 }
 
 #r_state 
@@ -23,4 +23,10 @@
     position:absolute;
     font-size: 50px;
     text-align: center;
+    user-select: none;
+}
+
+#r_state:active
+{
+    background-color: gray;
 }
