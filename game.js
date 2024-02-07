@@ -178,8 +178,6 @@ function draw_grid()
     }
 }
 
-
-
 function draw_tiles() 
 {
     let x = 0
