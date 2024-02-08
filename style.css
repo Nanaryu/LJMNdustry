@@ -1,32 +1,54 @@
-.inv
+#select
 {
-    margin-left: 70px;
-    margin-top: 70px;
-    width: 60px;
-    height: 60px;
-    background-color: pink;
-    border-spacing: 10px;
+    position:absolute; 
+    background-color: blueviolet; 
+    width: 200px; 
+    height: 640px; 
+    left: 650px;
+    text-align: center;
 }
 
-.inv:active
+#select *
+{
+    width: 60px;
+    height: 60px;
+    margin: 10px;
+    user-select: none;
+    cursor: pointer;
+}
+
+#freeblock
+{
+    background-color: green;
+    line-height: 55px;
+    font-family: arial;
+}
+
+#freeblock:active
+{
+    background-color: darkgreen;
+}
+
+#spawner
+{
+    background-color: pink;
+    line-height: 55px;
+    font-family: arial;
+}
+
+#spawner:active
 {
     background-color: palevioletred;
 }
 
-#r_state 
-{
-    margin-left: 70px;
-    margin-top: 70px;
-    width: 60px;
-    height: 60px;
-    background-color: aliceblue;
-    position:absolute;
-    font-size: 50px;
-    text-align: center;
-    user-select: none;
-}
-
-#r_state:active
+#conveyor
 {
     background-color: gray;
+    font-size: 32px;
+    line-height: 52px;
+}
+
+#conveyor:active
+{
+    background-color: rgb(84, 84, 84);
 }

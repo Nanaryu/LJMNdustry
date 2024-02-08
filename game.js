@@ -3,26 +3,51 @@ var c = canvas.getContext("2d")
 var g_size = 640
 var c_size = 64
 
-var rotation = 1
+var tit = new Image()
+tit.src = "item-titanium.png"
+
+var conv1 = new Image()
+conv1.src = "conv1.png"
+
+var conv2 = new Image()
+conv2.src = "conv2.png"
+
+var conv3 = new Image()
+conv3.src = "conv3.png"
+
+var conv4 = new Image()
+conv4.src = "conv4.png"
+
+var stats = 
+{
+    titanium: 100,
+}
+
 var blocks =
 {
     def_block: {
         letter: "D",
-        color: "blueviolet"
+        color: "gray",
+        cost: 10,
     },
     free_block: {
         letter: "F",
-        color: "darkgreen"
+        color: "darkgreen",
+        cost: 0,
     },
     pink_block: {
         letter: "P",
-        color: "pink"
+        color: "pink",
+        cost: 80,
     },
     blue_block: {
         letter: "B",
-        color: "blue"
+        color: "blue",
+        cost: 10,
     }
 }
+
+var rotation = 1
 
 var rotdecode = {
     1: "↑",
@@ -46,6 +71,20 @@ function velocity(x, y, rot)
     }
 }
 
+var cells = []
+/* cells = 
+[
+    [
+        [state, rotation],
+    ],
+] */
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const orbs = []
+
 class Orb 
 {
     constructor (x, y, r, dx=x, dy=y, moving=false)
@@ -56,16 +95,19 @@ class Orb
         this.moving = moving
         this.dx = dx
         this.dy = dy
+        this.score = 0
     }
 
     move_c() 
-    {
+    {   
+        this.fstyle = `rgb(0, ${this.score*5}, 0)`
+
         if (!this.moving) 
         {
             this.cell_x = Math.floor(this.x/c_size)
             this.cell_y = Math.floor(this.y/c_size)
 
-            if (this.cell_x < cells[0].length && this.cell_y < cells[0].length)
+            if (this.cell_x >= 0 && this.cell_x < cells[0].length && this.cell_y >= 0 && this.cell_y < cells[0].length)
             {
                 if (cells[this.cell_x][this.cell_y][0] == "D")
                 {
@@ -73,11 +115,13 @@ class Orb
                     this.dx = xy[0]
                     this.dy = xy[1]
                     this.moving = true
+                    this.score++
                 }
-                c.fillStyle = "red"
+                c.fillStyle = this.fstyle
+                text(`Score: ${this.score}`, this.x, this.y + 15, 10)
                 circle(this.x, this.y, this.r)
+                c.drawImage(tit, this.x-tit.width/2, this.y-tit.height/2)
             }
-            
         }
         else
         {
@@ -97,8 +141,11 @@ class Orb
             {
                 this.y -= 1
             }
-            c.fillStyle = "red"
+
+            c.fillStyle = this.fstyle
+            text(`Score: ${this.score}`, this.x, this.y + 15, 10)
             circle(this.x, this.y, this.r)
+            c.drawImage(tit, this.x-tit.width/2, this.y-tit.height/2)
             if (this.x == this.dx && this.y == this.dy)
             {
                 this.moving = false
@@ -106,114 +153,6 @@ class Orb
         }
     }
 }
-
-var current_block = blocks.def_block
-
-var inv = document.getElementById("select")
-
-var c_block = document.createElement("div")
-c_block.className = "inv"
-c_block.onclick = function () {current_block = blocks.pink_block}
-inv.appendChild(c_block)
-
-var r_state = document.createElement("span")
-r_state.innerHTML = rotdecode[rotation]
-r_state.id = "r_state"
-r_state.onclick = function () {current_block = blocks.def_block}
-inv.appendChild(r_state)
-
-
-function line(x, y, x1, x2) 
-{
-    c.beginPath()
-    c.moveTo(x, y)
-    c.lineTo(x1, x2)
-    c.stroke()
-}
-
-function text(txt, x, y)
-{
-    c.font = "32px Arial"
-    c.fillStyle = "white"
-    c.textAlign = "center"
-    c.fillText(txt, x, y+7)
-}
-
-function circle(x, y, radius)
-{
-    c.beginPath()
-    c.arc(x, y, radius, 0, Math.PI*2, false)
-    c.fill()
-    c.closePath()
-}
-
-var cells = []
-/* cells = 
-[
-    [
-        [state, rotation],
-    ],
-] */
-
-var colors = 
-{
-    free: "darkgreen",
-    blocked: "darkred",
-    hover: "blue"
-}
-
-
-
-
-function draw_grid() 
-{
-    for (i = 0; i < g_size ; i += c_size) 
-    {
-        line(0, i, g_size, i) // horizontal lines
-
-        for (j = 0; j < g_size; j += c_size) 
-        {
-            line(j, 0, j, g_size) // vertical lines
-        }
-    }
-}
-
-function draw_tiles() 
-{
-    let x = 0
-    let y = 0
-
-    for (i = 0; i < g_size; i += c_size) 
-    {
-        for (j = 0; j < g_size; j += c_size)
-        {
-            let cell = cells[x][y][0]
-            let rot  = cells[x][y][1]
-
-            Object.keys(blocks).forEach(key => {
-                if (cell == blocks[key].letter)
-                {
-                    // choose color based on color code of current block
-                    c.fillStyle = blocks[key].color 
-                }
-            })
-            
-            c.fillRect(i, j, c_size, c_size) // background 
-            if (cell == "D") 
-            {
-                text(rotdecode[rot], i+c_size/2, j+c_size/2) // arrow text in cell
-            }
-            y += 1
-        }
-        y = 0
-        x += 1
-    }
-}
-
-
-
-
-const orbs = []
 
 function spawnOrb() 
 {
@@ -280,6 +219,141 @@ function updateOrbPos()
     })
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var current_block = blocks.free_block
+
+var select = document.getElementById("select")
+
+var freeblock = document.createElement("div")
+freeblock.innerHTML = "free"
+freeblock.id = "freeblock"
+freeblock.onclick = function () {current_block = blocks.free_block}
+select.appendChild(freeblock)
+
+var spawner = document.createElement("div")
+spawner.innerHTML = "spawner"
+spawner.id = "spawner"
+spawner.onclick = function () {current_block = blocks.pink_block}
+select.appendChild(spawner)
+
+var conveyor = document.createElement("div")
+conveyor.innerHTML = rotdecode[rotation]
+conveyor.id = "conveyor"
+conveyor.onclick = function () {current_block = blocks.def_block}
+select.appendChild(conveyor)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function line(x, y, x1, x2) 
+{
+    c.beginPath()
+    c.moveTo(x, y)
+    c.lineTo(x1, x2)
+    c.stroke()
+    c.closePath()
+}
+
+function text(txt, x, y, fsize=32, fstyle="white")
+{
+    let lastStyle = c.fillStyle
+    c.font = `${fsize}px Arial`
+    c.fillStyle = fstyle
+    c.textAlign = "center"
+    c.fillText(txt, x, y+7)
+    c.fillStyle = lastStyle
+}
+
+function circle(x, y, radius)
+{
+    c.beginPath()
+    c.arc(x, y, radius, 0, Math.PI*2, false)
+    c.fill()
+    c.closePath()
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function draw_grid() 
+{
+    for (i = 0; i < g_size ; i += c_size) 
+    {
+        line(0, i, g_size, i) // horizontal lines
+
+        for (j = 0; j < g_size; j += c_size) 
+        {
+            line(j, 0, j, g_size) // vertical lines
+        }
+    }
+}
+
+function draw_tiles() 
+{
+    let x = 0
+    let y = 0
+
+    for (i = 0; i < g_size; i += c_size) 
+    {
+        for (j = 0; j < g_size; j += c_size)
+        {
+            let cell = cells[x][y][0]
+            let rot  = cells[x][y][1]
+
+            Object.keys(blocks).forEach(key => {
+                if (cell == blocks[key].letter)
+                {
+                    // choose color based on color code of current block
+                    c.fillStyle = blocks[key].color 
+                }
+            })
+            
+            c.fillRect(i, j, c_size, c_size) // background 
+
+            switch(cell)
+            {
+                default:
+                    break
+                case "D":
+                    {   
+                        switch(rot)
+                        {
+                            case 1: 
+                                c.drawImage(conv1, i, j, c_size, c_size)
+                                break
+                            case 2: 
+                                c.drawImage(conv2, i, j, c_size, c_size)
+                                break
+                            case 3: 
+                                c.drawImage(conv3, i, j, c_size, c_size)
+                                break
+                            case 4: 
+                                c.drawImage(conv4, i, j, c_size, c_size)
+                                break
+                        }
+                        
+                        //text(rotdecode[rot], i+c_size/2, j+c_size/2, 32, "black")
+                    }
+                    break
+                case "P":
+                    {
+                        text("spawner", i+c_size/2, j+c_size/2-3, 16, "black")
+                    }
+                    break
+            }
+            y += 1
+        }
+        y = 0
+        x += 1
+    }
+}
+
 function init()
 {
     if (cells.length == 0) 
@@ -315,6 +389,10 @@ function update()
     draw_grid()
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 canvas.addEventListener("click", function(e)
 {
     cell_x = Math.floor(e.offsetX/c_size)
@@ -322,10 +400,9 @@ canvas.addEventListener("click", function(e)
 
     cells[cell_x][cell_y] = [current_block.letter, rotation]
 
+
     c.fillStyle = current_block.color
     c.fillRect(cell_x * c_size, cell_y * c_size, c_size, c_size)
-
-    update()
 })
 
 window.addEventListener("keydown", function (e)
@@ -340,13 +417,17 @@ window.addEventListener("keydown", function (e)
         {
             rotation = 1
         }
-        r_state.innerHTML = rotdecode[rotation]
+        conveyor.innerHTML = rotdecode[rotation]
     }
     else if (e.key === "e")
     {
         spawnOrb()
     }
 })
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const animate = () => {
   requestAnimationFrame(animate)
@@ -358,6 +439,10 @@ const animate = () => {
 
 init()
 animate()
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* var last_x = 99
 var last_y = 99
