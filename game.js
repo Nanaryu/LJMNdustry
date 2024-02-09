@@ -23,6 +23,8 @@ var stats =
     titanium: 100,
 }
 
+var score = document.getElementById("score")
+
 var blocks =
 {
     def_block: {
@@ -40,9 +42,9 @@ var blocks =
         color: "pink",
         cost: 80,
     },
-    blue_block: {
-        letter: "B",
-        color: "blue",
+    coral_block: {
+        letter: "C",
+        color: "lightcoral",
         cost: 10,
     }
 }
@@ -116,6 +118,13 @@ class Orb
                     this.dy = xy[1]
                     this.moving = true
                     this.score++
+                }
+                else if (cells[this.cell_x][this.cell_y][0] == "C")
+                {   
+                    console.log(score.innerHTML.match(/[0-9]+/))
+                    score.innerHTML = `Score: ${parseInt(score.innerHTML.match(/[0-9]+/)) + this.score}`
+                    this.x = -10
+                    this.y = -10
                 }
                 c.fillStyle = this.fstyle
                 text(`Score: ${this.score}`, this.x, this.y + 15, 10)
@@ -245,6 +254,12 @@ conveyor.id = "conveyor"
 conveyor.onclick = function () {current_block = blocks.def_block}
 select.appendChild(conveyor)
 
+var collector = document.createElement("div")
+collector.innerHTML = "collector"
+collector.id = "collector"
+collector.onclick = function () {current_block = blocks.coral_block}
+select.appendChild(collector)
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,6 +359,11 @@ function draw_tiles()
                 case "P":
                     {
                         text("spawner", i+c_size/2, j+c_size/2-3, 16, "black")
+                    }
+                    break
+                case "C":
+                    {
+                        text("collector", i+c_size/2, j+c_size/2-3, 16, "black")
                     }
                     break
             }

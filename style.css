@@ -52,3 +52,32 @@
 {
     background-color: rgb(84, 84, 84);
 }
+
+#collector
+{
+    background-color: lightcoral;
+    font-size: 16px;
+    line-height: 55px;
+}
+
+#collector:active
+{
+    background-color: coral;
+}
+
+#stats
+{
+    position:absolute; 
+    background-color: lightseagreen; 
+    width: 200px; 
+    height: 640px; 
+    left: 850px;
+    text-align: center;
+}
+
+#score
+{
+    font-family: 'Helvetica';
+    font-size: 35px;
+    line-height: 60px;
+}
