@@ -6,11 +6,38 @@
     <meta charset="utf-8">
   </head>
   <body>
-    <canvas id="grid" width="640px" height="640px" style="position:absolute;"></canvas>
+    <canvas id="grid" width="768px" height="768px"></canvas>
+    <div id="all">
+
+      <div id="stats">
+        &nbsp;
+      <img src="item-titanium.png" style="top: 3px; position: relative;">
+      <span id="score" style="position: relative;">0</span>
+      <img src="power.png" style="top: 3px; position: relative;">
+      <span id="power" style="position: relative;">100%</span>
+        &nbsp;
+    </div>  
+
+    <br>
+
     <div id="select"></div>
-    <div id="stats">
-      <span id="score">Score: 0</span>
+
+    <br>
+
+    <div id="cost">
+      <span id="cost_span">-80</span>
+      <img src="item-titanium.png" style="top: 3px; position: relative;">
     </div>
+
+    <br>
+
+    <div id="music">
+      <img src="speaker.png" style="width: 35px; height: 35px; position: relative; top: 6px;">
+      <span id="music_span" style="position:relative;top:-3px;user-select: none;cursor:pointer;">OFF</span>
+    </div>
+
+    </div>
+    
     <script type="text/javascript" src="game.js"></script>
   </body>
 </html>
