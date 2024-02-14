@@ -203,6 +203,7 @@ function spawnOrb()
                     if (cells[x+1][y][0] == "D") // right
                     {
                         orbs.push(new Orb(ii, jj, c_size/8, ii+c_size, jj, true))
+                        stats.power -= 1
                     }
                 }
                 
@@ -211,6 +212,7 @@ function spawnOrb()
                     if (cells[x-1][y][0] == "D") // left
                     {
                         orbs.push(new Orb(ii, jj, c_size/8, ii-c_size, jj, true))
+                        stats.power -= 1
                     }
                 }
             
@@ -219,6 +221,7 @@ function spawnOrb()
                     if (cells[x][y+1][0] == "D") // down
                     {
                         orbs.push(new Orb(ii, jj, c_size/8, ii, jj+c_size, true))
+                        stats.power -= 1
                     }
                 }
 
@@ -227,6 +230,7 @@ function spawnOrb()
                     if (cells[x][y-1][0] == "D") // up
                     {
                         orbs.push(new Orb(ii, jj, c_size/8, ii, jj-c_size, true))
+                        stats.power -= 1
                     }   
                 }
             }
@@ -454,8 +458,13 @@ function updateStats()
     }
     if (stats.power == 0) 
     {
-        cells = null
-        alert("game over")
+        alert("GAME OVER (obiecuje ta gre rozwinac)")
+        window.location.reload()
+    }
+    if (stats.titanium > 250)
+    {
+        alert("YOU WIN (obiecuje ta gre rozwinac)")
+        window.location.reload()
     }
 }
 
@@ -622,7 +631,10 @@ setInterval(() => {
     if (stats.power > 0 && spawnToggle)
     {
         spawnOrb()
-        stats.power -= 1
+    }
+    if (stats.power < 100)
+    {
+        stats.power += 1
     }
 }, 500)
 

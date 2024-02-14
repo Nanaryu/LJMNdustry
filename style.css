@@ -7,7 +7,7 @@
 {
     position:relative;
     left: -9em;
-    top: -14.05em;
+    top: -9.5em;
 }
 
 #stats
@@ -64,6 +64,22 @@
     outline: 2px cyan solid;
     user-select: none;
     cursor: pointer;
+}
+
+#binds
+{
+    position:relative; 
+    background-color: rgb(48,48,48); 
+    text-align: center;
+    border-top-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    outline: 2px cyan solid;
+    font-family: 'lord';
+    font-size: 24px;
+    line-height: 65px;
+    color: rgb(233,233,233);
+    position: relative;
+    left: -2px;
 }
 
 
