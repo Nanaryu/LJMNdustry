@@ -5,9 +5,30 @@
 
 #all
 {
-    position:relative;
-    left: -9em;
-    top: -9.5em;
+    position: absolute;
+    left: 60vw;
+    background-color: crimson;
+}
+
+.test
+{
+    display: inline-flex;
+    text-overflow: ellipsis;
+    width: 150px;
+    white-space: nowrap;
+}
+
+.ui
+{
+    border-top-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border: 5px rgb(38,38,38) solid;
+}
+
+#ui
+{
+   margin-left:20px;
+   margin-right: 20px;
 }
 
 #stats
@@ -15,9 +36,6 @@
     position:relative; 
     background-color: rgb(48,48,48); 
     text-align: center;
-    border-top-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    outline: 2px cyan solid;
 }
 
 #select
@@ -25,10 +43,6 @@
     position:relative; 
     background-color: rgb(48,48,48); 
     text-align: center;
-    display: flex;
-    border-top-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    outline: 2px cyan solid;
 }
 
 #select *
@@ -45,9 +59,6 @@
     position:relative; 
     background-color: rgb(48,48,48); 
     text-align: center;
-    border-top-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    outline: 2px cyan solid;
 }
 
 #music
@@ -59,9 +70,7 @@
     text-align: center; 
     line-height: 48px;
     color: rgb(233,233,233);
-    border-top-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    outline: 2px cyan solid;
+
     user-select: none;
     cursor: pointer;
 }
@@ -71,19 +80,13 @@
     position:relative; 
     background-color: rgb(48,48,48); 
     text-align: center;
-    border-top-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    outline: 2px cyan solid;
     font-family: 'lord';
     font-size: 24px;
     line-height: 65px;
     color: rgb(233,233,233);
-    position: relative;
-    left: -2px;
 }
 
-
-#score, #power, #cost_span
+.ui_text
 {
     font-family: 'lord';
     font-size: 35px;
@@ -105,8 +108,8 @@ body {
 
 canvas
 {
-    position: relative;
-    left: -10em;
+    position: absolute;
+    left: 15vw;
     border-radius: 15px;
     outline: 2px rgba(233,233,233,0.3) solid;
 }

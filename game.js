@@ -1,45 +1,51 @@
-var canvas = document.getElementById("grid")
-var c = canvas.getContext("2d")
-var g_size = 768
-var c_size = 48
+const canvas = document.createElement("canvas")
+const g_size = 768
+const c_size = 48
 
+canvas.width = g_size
+canvas.height = g_size
 
-var tit = new Image()
+const all = document.getElementById("all")
+document.querySelector("body").insertBefore(canvas, document.querySelector("body").firstChild)
+
+const c = canvas.getContext("2d")
+
+const tit = new Image()
 tit.src = "item-titanium.png"
 tit.height = 30
 tit.width = 30
 
-var conv1 = new Image()
+const conv1 = new Image()
 conv1.src = "conv1.png"
 
-var conv2 = new Image()
+const conv2 = new Image()
 conv2.src = "conv2.png"
 
-var conv3 = new Image()
+const conv3 = new Image()
 conv3.src = "conv3.png"
 
-var conv4 = new Image()
+const conv4 = new Image()
 conv4.src = "conv4.png"
 
-var grass = new Image()
+const grass = new Image()
 grass.src = "grass.png"
 
-var coll = new Image()
+const coll = new Image()
 coll.src = "collector.png"
 
-var spawn = new Image()
+const spawn = new Image()
 spawn.src = "spawner.png"
 
-var stats = 
+const stats = 
 {
-    titanium: 100,
-    power: 100,
+    titanium: 12500,
+    power: 8345,
 }
 
-var score = document.getElementById("score")
-var power = document.getElementById("power")
+const score = document.getElementById("score")
+const power = document.getElementById("power")
 
-var blocks =
+const blocks =
 {
     conveyor: {
         letter: "D",
@@ -256,39 +262,43 @@ function updateOrbPos()
 
 var current_block = blocks.freeblock
 
-var select = document.getElementById("select")
+const select = document.getElementById("select")
 
-var freeblock = document.createElement("img")
+const freeblock = document.createElement("img")
 freeblock.src = grass.src
 freeblock.id = "freeblock"
 freeblock.onclick = function () {current_block = blocks.freeblock}
+freeblock.setAttribute("draggable", false)
 select.appendChild(freeblock)
 
-var spawner = document.createElement("img")
+const spawner = document.createElement("img")
 spawner.src = spawn.src
 spawner.id = "spawner"
 spawner.onclick = function () {current_block = blocks.spawner}
+spawner.setAttribute("draggable", false)
 select.appendChild(spawner)
 
-var conveyor = document.createElement("img")
+const conveyor = document.createElement("img")
 conveyor.src = conv1.src
 conveyor.id = "conveyor"
 conveyor.onclick = function () {current_block = blocks.conveyor}
+conveyor.setAttribute("draggable", false)
 select.appendChild(conveyor)
 
-var collector = document.createElement("img")
+const collector = document.createElement("img")
 collector.src = coll.src
 collector.id = "collector"
 collector.onclick = function () {current_block = blocks.collector}
+collector.setAttribute("draggable", false)
 select.appendChild(collector)
 
-var cost_span = document.getElementById("cost_span")
+const cost_span = document.getElementById("cost_span")
 
-var audio = new Audio('game3.mp3')
+const audio = new Audio('game3.mp3')
 audio.loop = true
 audio.volume = 0.4
 
-var music_span = document.getElementById("music_span")
+const music_span = document.getElementById("music_span")
 let music_on = false
 music_span.onclick = function () 
 {
@@ -434,10 +444,12 @@ function selectedBlock()
     for (let i = 0; i < selchild.length; i++)
     {
         if (selchild[i].id == current_block.name) {
-            selchild[i].style.boxShadow =  "0 0 10px cyan"
+            selchild[i].style.outline =  "2px white solid"
+            selchild[i].style.boxShadow = "0 0 10px white"
         }
         else
         {
+            selchild[i].style.outline = "none"
             selchild[i].style.boxShadow = "none"
         }
     }
@@ -445,8 +457,20 @@ function selectedBlock()
 
 function updateStats()
 {
-    score.innerHTML = stats.titanium
-    power.innerHTML = `${stats.power}%`
+    if (stats.titanium < 1000)
+    {
+        score.innerHTML = stats.titanium
+    }
+    else if (1000 <= stats.titanium && stats.titanium < 10000)
+    {
+        score.innerHTML = `${String(stats.titanium)[0]}.${String(stats.titanium)[1]}k`
+    }
+    else if (10000 <= stats.titanium && stats.titanium < 100000)
+    {
+        score.innerHTML = `${String(stats.titanium)[0]}${String(stats.titanium)[1]}.${String(stats.titanium)[2]}k`
+    }
+    
+    power.innerHTML = `${stats.power}`
     cost_span.innerHTML = current_block.cost
     if (current_block.cost <= stats.titanium)
     {
@@ -458,13 +482,13 @@ function updateStats()
     }
     if (stats.power == 0) 
     {
-        alert("GAME OVER (obiecuje ta gre rozwinac)")
-        window.location.reload()
+        //alert("GAME OVER (obiecuje ta gre rozwinac)")
+        //window.location.reload()
     }
     if (stats.titanium > 250)
     {
-        alert("YOU WIN (obiecuje ta gre rozwinac)")
-        window.location.reload()
+        //alert("YOU WIN (obiecuje ta gre rozwinac)")
+        //window.location.reload()
     }
 }
 
@@ -494,6 +518,7 @@ function init()
             x += 1
         }
     }
+    cells = [[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]]]
 }
 
 function frame() 

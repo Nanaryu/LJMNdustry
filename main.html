@@ -6,45 +6,60 @@
     <meta charset="utf-8">
   </head>
   <body>
-    <canvas id="grid" width="768px" height="768px"></canvas>
     <div id="all">
+      <!-- canvas here -->
+      <div id="ui">
+        <br>
 
-      <div id="stats">
-        &nbsp;
-      <img src="item-titanium.png" style="top: 3px; position: relative;">
-      <span id="score" style="position: relative;">0</span>
-      <img src="power.png" style="top: 3px; position: relative;">
-      <span id="power" style="position: relative;">100%</span>
-        &nbsp;
-    </div>  
+        <div class="ui" style="position:relative; background-color: rgb(48,48,48); text-align: center;">
+          <span class="ui_text" style="color: rgb(237, 84, 84);"> devmode </span>
+        </div>
+        
+        <br>
 
-    <br>
+        <div id="stats" class="ui">
+          &nbsp;
+          <div>
+            <img src="item-titanium.png" style="top: 3px; position: relative;">
+            <span id="score" class="ui_text test" style="position: relative; background-color:coral">0</span>
+          
+            <img src="power.png" style="top: 3px; position: relative;">
+            <span id="power" class="ui_text test" style="position: relative; background-color:coral">100%</span>
+          </div>
+          &nbsp;
+        </div>  
 
-    <div id="select"></div>
+        <br>
 
-    <br>
+        <div id="select" class="ui"></div>
 
-    <div id="cost">
-      <span id="cost_span">-80</span>
-      <img src="item-titanium.png" style="top: 3px; position: relative;">
+        <br>
+
+        <div id="cost" class="ui">
+          <span class="ui_text">Cost: </span>
+          <span id="cost_span" class="ui_text">{}</span>
+          <img src="item-titanium.png" style="top: 3px; position: relative;">
+        </div>
+
+        <br>
+
+        <div id="music" class="ui">
+          <img src="speaker.png" style="width: 35px; height: 35px; position: relative; top: 6px;">
+          <span id="music_span" class="ui_text" style="position:relative;top:-3px;user-select: none;cursor:pointer;">OFF</span>
+        </div>
+
+        <br>
+
+        <div id="binds" class="ui">
+          E - Toggle spawn <br>
+          R - Rotate conveyor
+        </div>
+
+        <br>
+
+      </div>
     </div>
 
-    <br>
-
-    <div id="music">
-      <img src="speaker.png" style="width: 35px; height: 35px; position: relative; top: 6px;">
-      <span id="music_span" style="position:relative;top:-3px;user-select: none;cursor:pointer;">OFF</span>
-    </div>
-
-    <br>
-
-    <div id="binds">
-      E - Toggle spawn <br>
-      R - Rotate conveyor
-    </div>
-
-    </div>
-    
     <script type="text/javascript" src="game.js"></script>
   </body>
 </html>
