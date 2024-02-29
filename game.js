@@ -5,7 +5,6 @@ const c_size = 48
 canvas.width = g_size
 canvas.height = g_size
 
-const all = document.getElementById("all")
 document.querySelector("body").insertBefore(canvas, document.querySelector("body").firstChild)
 
 const c = canvas.getContext("2d")
@@ -38,7 +37,7 @@ spawn.src = "assets/img/spawner.png"
 
 const stats = 
 {
-    titanium: 12500,
+    titanium: 100,
     power: 8543,
 }
 
@@ -126,8 +125,6 @@ class Orb
 
     move_c() 
     {   
-        this.fstyle = `rgb(0, ${this.score*5}, 0)`
-
         if (!this.moving) 
         {
             this.cell_x = Math.floor(this.x/c_size)
@@ -145,14 +142,23 @@ class Orb
                 }
                 else if (cells[this.cell_x][this.cell_y][0] == "C")
                 {   
-                    //score.innerHTML = `Score: ${parseInt(score.innerHTML.match(/[0-9]+/)) + this.score}`
                     stats.titanium += this.score
-                    this.x = -10
-                    this.y = -10
+                    this.x = null
+                    this.y = null
+                    this.r = null
+                    this.moving = null
+                    this.dx = null
+                    this.dy = null
+                    this.score = null
+                    this.cell_x = null
+                    this.cell_y = null
+                    delete this.cell_x
+                    delete this.cell_y
+                    this.x = 99999
+                    this.y = 99999
+                   
                 }
-                c.fillStyle = this.fstyle
-                c.drawImage(tit, this.x-tit.width/2, this.y-tit.height/2, tit.width, tit.height)
-                text(`${this.score}`, this.x, this.y-2, 10)
+                c.drawImage(tit, this.x-tit.width/2-cameraX, this.y-tit.height/2-cameraY, tit.width, tit.height)
             }
         }
         else
@@ -174,10 +180,7 @@ class Orb
                 this.y -= 1
             }
 
-            c.fillStyle = this.fstyle
-        
-            c.drawImage(tit, this.x-tit.width/2, this.y-tit.height/2, tit.width, tit.height)
-            text(`${this.score}`, this.x, this.y-2, 10)
+            c.drawImage(tit, this.x-tit.width/2-cameraX, this.y-tit.height/2-cameraY, tit.width, tit.height)
 
             if (this.x == this.dx && this.y == this.dy)
             {
@@ -260,6 +263,55 @@ function updateOrbPos()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const player = {
+    x: g_size/2,
+    y: g_size/2,
+    radius: 15,
+    speed: 5,
+}
+
+const keys = {}
+
+window.addEventListener("keydown", e => 
+{
+    keys[e.key] = true
+})
+
+window.addEventListener("keyup", e => 
+{
+    keys[e.key] = false
+})
+
+var cameraX = player.x - g_size / 2
+var cameraY = player.y - g_size / 2
+
+function updatePlayer() {
+    if (keys["ArrowUp"] || keys["w"]) 
+    {
+        player.y -= player.speed
+    }
+    if (keys["ArrowDown"] || keys["s"]) 
+    {
+        player.y += player.speed
+    }
+    if (keys["ArrowLeft"] || keys["a"]) 
+    {
+        player.x -= player.speed
+    }
+    if (keys["ArrowRight"] || keys["d"]) 
+    {
+        player.x += player.speed
+    }
+    cameraX = player.x - g_size / 2
+    cameraY = player.y - g_size / 2
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var current_block = blocks.freeblock
 
 const select = document.getElementById("select")
@@ -327,11 +379,21 @@ function text(txt, x, y, fsize=32, fstyle="white")
     c.fillStyle = lastStyle
 }
 
-function circle(x, y, radius)
+function circle(x, y, radius, style="white")
 {
     c.beginPath()
     c.arc(x, y, radius, 0, Math.PI*2, false)
+    c.fillStyle = style
     c.fill()
+    c.closePath()
+}
+
+function circleE(x, y, radius, style="white")
+{
+    c.beginPath()
+    c.arc(x, y, radius, 0, Math.PI*2, false)
+    c.strokeStyle = style
+    c.stroke()
     c.closePath()
 }
 
@@ -339,16 +401,24 @@ function circle(x, y, radius)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function draw_grid() 
-{
-    for (i = 0; i < g_size ; i += c_size) 
+function draw_grid() {
+    const expanded_size = g_size + 2 * c_size
+
+    const startX = -cameraX % c_size - c_size
+    const endX = expanded_size - cameraX % c_size + c_size
+    const startY = -cameraY % c_size - c_size
+    const endY = expanded_size - cameraY % c_size + c_size
+
+    // horizontal lines
+    for (let i = startY; i <= endY; i += c_size) 
     {
-        line(0, i, g_size, i, "rgba(233,233,233,0.3)") // horizontal lines
+        line(startX, i, endX, i, "rgba(233,233,233,0.3)")
     }
 
-    for (j = 0; j < g_size; j += c_size) 
+    // vertical lines
+    for (let j = startX; j <= endX; j += c_size) 
     {
-        line(j, 0, j, g_size, "rgba(233,233,233,0.3)") // vertical lines
+        line(j, startY, j, endY, "rgba(233,233,233,0.3)")
     }
 }
 
@@ -364,15 +434,8 @@ function draw_tiles()
             let cell = cells[x][y][0]
             let rot  = cells[x][y][1]
 
-            Object.keys(blocks).forEach(key => {
-                if (cell == blocks[key].letter)
-                {
-                    // choose color based on color code of current block
-                    c.fillStyle = blocks[key].color 
-                }
-            })
-            
-            c.fillRect(i, j, c_size, c_size) // background 
+            let fx = i - cameraX
+            let fy = j - cameraY
 
             switch(cell)
             {
@@ -380,7 +443,7 @@ function draw_tiles()
                     break
                 case "F":
                     {
-                        c.drawImage(grass, i, j, c_size, c_size)
+                        c.drawImage(grass, fx, fy, c_size, c_size)
                         break
                     }
                 case "D":
@@ -388,32 +451,28 @@ function draw_tiles()
                         switch(rot)
                         {
                             case 1: 
-                                c.drawImage(conv1, i, j, c_size, c_size)
+                                c.drawImage(conv1, fx, fy, c_size, c_size)
                                 break
                             case 2: 
-                                c.drawImage(conv2, i, j, c_size, c_size)
+                                c.drawImage(conv2, fx, fy, c_size, c_size)
                                 break
                             case 3: 
-                                c.drawImage(conv3, i, j, c_size, c_size)
+                                c.drawImage(conv3, fx, fy, c_size, c_size)
                                 break
                             case 4: 
-                                c.drawImage(conv4, i, j, c_size, c_size)
+                                c.drawImage(conv4, fx, fy, c_size, c_size)
                                 break
                         }
-                        
-                        //text(rotdecode[rot], i+c_size/2, j+c_size/2, 32, "black")
                     }
                     break
                 case "P":
                     {
-                        //text("spawner", i+c_size/2, j+c_size/2-3, 16, "black")
-                        c.drawImage(spawn, i, j, c_size, c_size)
+                        c.drawImage(spawn, fx, fy, c_size, c_size)
                         break
                     }
                 case "C":
                     {
-                        //text("collector", i+c_size/2, j+c_size/2-3, 16, "black")
-                        c.drawImage(coll, i, j, c_size, c_size)
+                        c.drawImage(coll, fx, fy, c_size, c_size)
                         break
                     }
             }
@@ -444,7 +503,7 @@ function selectedBlock()
 function kFormat(value)
 {
     let svalue = String(value)
-    if (value.length < 1000)
+    if (value < 1000)
     {
         return svalue
     }
@@ -521,16 +580,19 @@ function init()
             x += 1
         }
     }
-    cells = [[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]]]
+    //cells = [[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]]]
 }
 
 function frame() 
 {   
+    updatePlayer()
     updateStats()
     selectedBlock()
     draw_tiles()
     updateOrbPos()
     draw_grid()
+
+    circleE(g_size / 2, g_size / 2, player.radius, "white")
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -542,8 +604,8 @@ canvas.addEventListener("mousedown", function(e)
 {
     if (e.button === 0 && current_block.cost <= stats.titanium)
     {
-        cell_x = Math.floor(e.offsetX/c_size)
-        cell_y = Math.floor(e.offsetY/c_size)
+        cell_x = Math.floor((e.offsetX+cameraX)/c_size)
+        cell_y = Math.floor((e.offsetY+cameraY)/c_size)
 
         if (cells[cell_x][cell_y][0] != current_block.letter || cells[cell_x][cell_y][1] != rotation)
         {
@@ -578,8 +640,8 @@ canvas.addEventListener("mousemove", function(e)
 {
     if (mouseheld && current_block.cost <= stats.titanium)
     {
-        cell_x = Math.floor(e.offsetX/c_size)
-        cell_y = Math.floor(e.offsetY/c_size)
+        cell_x = Math.floor((e.offsetX+cameraX)/c_size)
+        cell_y = Math.floor((e.offsetY+cameraY)/c_size)
 
         if (cells[cell_x][cell_y][0] != current_block.letter || cells[cell_x][cell_y][1] != rotation)
         {
