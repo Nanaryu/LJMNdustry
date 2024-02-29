@@ -1,41 +1,76 @@
 @font-face {
     font-family: "lord";
-    src: url("font.ttf") format("truetype");
+    src: url("assets/font.ttf") format("truetype");
 }
 
 #all
 {
-    position: absolute;
-    left: 60vw;
-    background-color: crimson;
+    position: relative;
+    background-color: rgb(18,18,18);
+    margin-left: 50px;
+    border-bottom: 5px rgba(233,233,233,0.3) solid;
+    border-top: 5px rgba(233,233,233,0.3) solid;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    width: 350px;
 }
 
-.test
+#mat_internal
 {
-    display: inline-flex;
-    text-overflow: ellipsis;
-    width: 150px;
-    white-space: nowrap;
+    padding-left: 23%;
+}
+
+.mat_count
+{
+    border: 2px rgb(68,68,68) solid;
+    box-shadow: 0 0 5px rgb(68,68,68);
+    padding-left: 5px;
+    background-color: rgb(38,38,38);
+    margin-bottom: 7px;
+    width: 160px;
+}
+
+.mat_icon
+{   
+    width: 30px;
+    height: 30px;
+    top: 7px;
+    position: relative;
 }
 
 .ui
 {
     border-top-left-radius: 15px;
     border-bottom-right-radius: 15px;
-    border: 5px rgb(38,38,38) solid;
+    border: 5px rgb(68,68,68) solid;
+    box-shadow: 0 0 10px rgba(233,233,233, 0.2);
+}
+
+.ui_text
+{
+    font-family: 'lord';
+    font-size: 35px;
+    line-height: 65px;
+    color: rgb(233,233,233);
+    position: relative;
+    left: -2px;
 }
 
 #ui
 {
-   margin-left:20px;
+   margin-left: 20px;
    margin-right: 20px;
 }
 
 #stats
 {
-    position:relative; 
+    position: relative;
     background-color: rgb(48,48,48); 
     text-align: center;
+}
+
+#stats *
+{
+    font-size: 22px;
 }
 
 #select
@@ -47,18 +82,24 @@
 
 #select *
 {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     margin: 10px;
     user-select: none;
     cursor: pointer;
 }
 
-#cost
+
+#item_info
 {
     position:relative; 
     background-color: rgb(48,48,48); 
     text-align: center;
+}
+
+#item_requirements
+{
+    font-size: 35px;
 }
 
 #music
@@ -70,7 +111,6 @@
     text-align: center; 
     line-height: 48px;
     color: rgb(233,233,233);
-
     user-select: none;
     cursor: pointer;
 }
@@ -86,16 +126,6 @@
     color: rgb(233,233,233);
 }
 
-.ui_text
-{
-    font-family: 'lord';
-    font-size: 35px;
-    line-height: 65px;
-    color: rgb(233,233,233);
-    position: relative;
-    left: -2px;
-}
-
 body {
     background-color: rgb(28,28,28);
     display: flex;
@@ -108,8 +138,7 @@ body {
 
 canvas
 {
-    position: absolute;
-    left: 15vw;
+    position: relative;
     border-radius: 15px;
     outline: 2px rgba(233,233,233,0.3) solid;
 }

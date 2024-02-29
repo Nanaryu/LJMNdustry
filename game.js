@@ -11,38 +11,38 @@ document.querySelector("body").insertBefore(canvas, document.querySelector("body
 const c = canvas.getContext("2d")
 
 const tit = new Image()
-tit.src = "item-titanium.png"
+tit.src = "assets/img/item-titanium.png"
 tit.height = 30
 tit.width = 30
 
 const conv1 = new Image()
-conv1.src = "conv1.png"
+conv1.src = "assets/img/conv1.png"
 
 const conv2 = new Image()
-conv2.src = "conv2.png"
+conv2.src = "assets/img/conv2.png"
 
 const conv3 = new Image()
-conv3.src = "conv3.png"
+conv3.src = "assets/img/conv3.png"
 
 const conv4 = new Image()
-conv4.src = "conv4.png"
+conv4.src = "assets/img/conv4.png"
 
 const grass = new Image()
-grass.src = "grass.png"
+grass.src = "assets/img/grass.png"
 
 const coll = new Image()
-coll.src = "collector.png"
+coll.src = "assets/img/collector.png"
 
 const spawn = new Image()
-spawn.src = "spawner.png"
+spawn.src = "assets/img/spawner.png"
 
 const stats = 
 {
     titanium: 12500,
-    power: 8345,
+    power: 8543,
 }
 
-const score = document.getElementById("score")
+const titanium = document.getElementById("score")
 const power = document.getElementById("power")
 
 const blocks =
@@ -264,55 +264,41 @@ var current_block = blocks.freeblock
 
 const select = document.getElementById("select")
 
-const freeblock = document.createElement("img")
-freeblock.src = grass.src
-freeblock.id = "freeblock"
-freeblock.onclick = function () {current_block = blocks.freeblock}
-freeblock.setAttribute("draggable", false)
-select.appendChild(freeblock)
+function createBlock(src, id, onclick) {
+    const block = document.createElement("img")
+    block.src = src
+    block.id = id
+    block.onclick = onclick
+    block.setAttribute("draggable", false)
+    select.appendChild(block)
+}
 
-const spawner = document.createElement("img")
-spawner.src = spawn.src
-spawner.id = "spawner"
-spawner.onclick = function () {current_block = blocks.spawner}
-spawner.setAttribute("draggable", false)
-select.appendChild(spawner)
+createBlock(grass.src, "freeblock", function() {current_block = blocks.freeblock})
+createBlock(spawn.src, "spawner", function() {current_block = blocks.spawner})
+createBlock(conv1.src, "conveyor", function() {current_block = blocks.conveyor})
+createBlock(coll.src, "collector", function() {current_block = blocks.collector})
 
-const conveyor = document.createElement("img")
-conveyor.src = conv1.src
-conveyor.id = "conveyor"
-conveyor.onclick = function () {current_block = blocks.conveyor}
-conveyor.setAttribute("draggable", false)
-select.appendChild(conveyor)
+const cost_span = document.getElementById("item_requirements")
 
-const collector = document.createElement("img")
-collector.src = coll.src
-collector.id = "collector"
-collector.onclick = function () {current_block = blocks.collector}
-collector.setAttribute("draggable", false)
-select.appendChild(collector)
-
-const cost_span = document.getElementById("cost_span")
-
-const audio = new Audio('game3.mp3')
+const audio = new Audio('assets/audio/game3.mp3')
 audio.loop = true
-audio.volume = 0.4
+audio.volume = 0.2
 
-const music_span = document.getElementById("music_span")
+const speaker = document.getElementById("speaker")
 let music_on = false
-music_span.onclick = function () 
+speaker.onclick = function ()
 {
     if(!music_on) 
     {
         audio.play()
         music_on = true
-        music_span.innerHTML = "ON"
+        speaker.src = "assets/img/speakerON.png"
     } 
     else 
     {
         audio.pause()
         music_on = false
-        music_span.innerHTML = "OFF"
+        speaker.src = "assets/img/speaker.png"
     }
 }
 
@@ -455,22 +441,39 @@ function selectedBlock()
     }
 }
 
+function kFormat(value)
+{
+    let svalue = String(value)
+    if (value.length < 1000)
+    {
+        return svalue
+    }
+    else if (1000 <= value && value < 10000)
+    {
+        return `${svalue[0]}.${svalue[1]}k`
+    }
+    else if (10000 <= value && value < 100000)
+    {
+        return `${svalue[0]}${svalue[1]}.${svalue[2]}k`
+    }
+}
+
 function updateStats()
 {
     if (stats.titanium < 1000)
     {
-        score.innerHTML = stats.titanium
+        titanium.innerHTML = "<img src='assets/img/item-titanium.png' class='mat_icon'>" + kFormat(stats.titanium)
     }
     else if (1000 <= stats.titanium && stats.titanium < 10000)
     {
-        score.innerHTML = `${String(stats.titanium)[0]}.${String(stats.titanium)[1]}k`
+        titanium.innerHTML = "<img src='assets/img/item-titanium.png' class='mat_icon'>" + kFormat(stats.titanium)
     }
     else if (10000 <= stats.titanium && stats.titanium < 100000)
     {
-        score.innerHTML = `${String(stats.titanium)[0]}${String(stats.titanium)[1]}.${String(stats.titanium)[2]}k`
+        titanium.innerHTML = "<img src='assets/img/item-titanium.png' class='mat_icon'>" + kFormat(stats.titanium)
     }
     
-    power.innerHTML = `${stats.power}`
+    power.innerHTML = "<img src='assets/img/power.png' class='mat_icon'>" + kFormat(stats.power)
     cost_span.innerHTML = current_block.cost
     if (current_block.cost <= stats.titanium)
     {

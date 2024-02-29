@@ -9,22 +9,34 @@
     <div id="all">
       <!-- canvas here -->
       <div id="ui">
-        <br>
-
-        <div class="ui" style="position:relative; background-color: rgb(48,48,48); text-align: center;">
-          <span class="ui_text" style="color: rgb(237, 84, 84);"> devmode </span>
-        </div>
         
         <br>
 
         <div id="stats" class="ui">
           &nbsp;
-          <div>
-            <img src="item-titanium.png" style="top: 3px; position: relative;">
-            <span id="score" class="ui_text test" style="position: relative; background-color:coral">0</span>
-          
-            <img src="power.png" style="top: 3px; position: relative;">
-            <span id="power" class="ui_text test" style="position: relative; background-color:coral">100%</span>
+          <div id="mat_internal">
+
+            <div class="mat_count">
+              <span id="score" class="ui_text">
+                <img src="assets/img/item-titanium.png" class="mat_icon">
+                  {}
+              </span>
+            </div>
+
+            <div class="mat_count">
+              <span id="power" class="ui_text">
+                <img src="assets/img/power.png" class="mat_icon">
+                {}
+              </span> 
+            </div>
+
+            <div class="mat_count">
+              <span id="grp" class="ui_text">
+                <img src="assets/img/item-graphite.png" class="mat_icon">
+                200.2k
+              </span>
+            </div>
+
           </div>
           &nbsp;
         </div>  
@@ -35,17 +47,16 @@
 
         <br>
 
-        <div id="cost" class="ui">
+        <div id="item_info" class="ui">
           <span class="ui_text">Cost: </span>
-          <span id="cost_span" class="ui_text">{}</span>
-          <img src="item-titanium.png" style="top: 3px; position: relative;">
+          <span id="item_requirements" class="ui_text">{}</span>
+          <img src="assets/img/item-titanium.png" style="top: 3px; position: relative;">
         </div>
 
         <br>
 
         <div id="music" class="ui">
-          <img src="speaker.png" style="width: 35px; height: 35px; position: relative; top: 6px;">
-          <span id="music_span" class="ui_text" style="position:relative;top:-3px;user-select: none;cursor:pointer;">OFF</span>
+          <img id="speaker" src="assets/img/speaker.png" style="width: 40px; height: 40px; position: relative; top: 6px;">
         </div>
 
         <br>
