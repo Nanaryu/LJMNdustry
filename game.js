@@ -43,6 +43,7 @@ const stats =
 
 const titanium = document.getElementById("score")
 const power = document.getElementById("power")
+const item_desc =  document.getElementById("item-desc")
 
 const blocks =
 {
@@ -50,25 +51,29 @@ const blocks =
         letter: "D",
         color: "gray",
         cost: 10,
-        name: "conveyor"
+        name: "conveyor",
+        desc: "Basic conveyor used for material transportation"
     },
     freeblock: {
         letter: "F",
         color: "darkgreen",
         cost: 0,
         name: "freeblock",
+        desc: "Grass block commonly found on the map"
     },
     spawner: {
         letter: "P",
         color: "pink",
         cost: 80,
         name: "spawner",
+        desc: "Basic drill used for material mining",
     },
     collector: {
         letter: "C",
         color: "lightcoral",
         cost: 10,
         name: "collector",
+        desc: "The core holds all materials that are transported to it"
     }
 }
 
@@ -120,7 +125,6 @@ class Orb
         this.moving = moving
         this.dx = dx
         this.dy = dy
-        this.score = 0
     }
 
     move_c() 
@@ -138,11 +142,10 @@ class Orb
                     this.dx = xy[0]
                     this.dy = xy[1]
                     this.moving = true
-                    this.score++
                 }
                 else if (cells[this.cell_x][this.cell_y][0] == "C")
                 {   
-                    stats.titanium += this.score
+                    stats.titanium += 1
                     this.x = null
                     this.y = null
                     this.r = null
@@ -332,7 +335,7 @@ createBlock(coll.src, "collector", function() {current_block = blocks.collector}
 
 const cost_span = document.getElementById("item_requirements")
 
-const audio = new Audio('assets/audio/game3.mp3')
+/* const audio = new Audio('assets/audio/game3.mp3')
 audio.loop = true
 audio.volume = 0.2
 
@@ -352,7 +355,7 @@ speaker.onclick = function ()
         music_on = false
         speaker.src = "assets/img/speaker.png"
     }
-}
+} */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -422,7 +425,7 @@ function draw_grid() {
     }
 }
 
-function draw_tiles() 
+function draw_conveyors()
 {
     let x = 0
     let y = 0
@@ -433,6 +436,45 @@ function draw_tiles()
         {
             let cell = cells[x][y][0]
             let rot  = cells[x][y][1]
+
+            let fx = i - cameraX
+            let fy = j - cameraY
+
+            if (cell == "D")
+            {
+                switch(rot)
+                {
+                    case 1: 
+                        c.drawImage(conv1, fx, fy, c_size, c_size)
+                        break
+                    case 2: 
+                        c.drawImage(conv2, fx, fy, c_size, c_size)
+                        break
+                    case 3: 
+                        c.drawImage(conv3, fx, fy, c_size, c_size)
+                        break
+                    case 4: 
+                        c.drawImage(conv4, fx, fy, c_size, c_size)
+                        break
+                }
+            }
+            y += 1
+        }
+        y = 0
+        x += 1
+    }
+}
+
+function draw_tiles() 
+{
+    let x = 0
+    let y = 0
+
+    for (i = 0; i < g_size; i += c_size) 
+    {
+        for (j = 0; j < g_size; j += c_size)
+        {
+            let cell = cells[x][y][0]
 
             let fx = i - cameraX
             let fy = j - cameraY
@@ -448,23 +490,8 @@ function draw_tiles()
                     }
                 case "D":
                     {   
-                        switch(rot)
-                        {
-                            case 1: 
-                                c.drawImage(conv1, fx, fy, c_size, c_size)
-                                break
-                            case 2: 
-                                c.drawImage(conv2, fx, fy, c_size, c_size)
-                                break
-                            case 3: 
-                                c.drawImage(conv3, fx, fy, c_size, c_size)
-                                break
-                            case 4: 
-                                c.drawImage(conv4, fx, fy, c_size, c_size)
-                                break
-                        }
+                        break
                     }
-                    break
                 case "P":
                     {
                         c.drawImage(spawn, fx, fy, c_size, c_size)
@@ -476,6 +503,7 @@ function draw_tiles()
                         break
                     }
             }
+            //text(`[${x}][${y}]`, fx + c_size/2, fy + c_size/2 -3, 14, "black")
             y += 1
         }
         y = 0
@@ -517,6 +545,7 @@ function kFormat(value)
     }
 }
 
+
 function updateStats()
 {
     if (stats.titanium < 1000)
@@ -533,25 +562,12 @@ function updateStats()
     }
     
     power.innerHTML = "<img src='assets/img/power.png' class='mat_icon'>" + kFormat(stats.power)
+
     cost_span.innerHTML = current_block.cost
-    if (current_block.cost <= stats.titanium)
-    {
-        cost_span.style.color = "lightgreen"
-    }
-    else
-    {
-        cost_span.style.color = "rgb(237, 84, 84)"
-    }
-    if (stats.power == 0) 
-    {
-        //alert("GAME OVER (obiecuje ta gre rozwinac)")
-        //window.location.reload()
-    }
-    if (stats.titanium > 250)
-    {
-        //alert("YOU WIN (obiecuje ta gre rozwinac)")
-        //window.location.reload()
-    }
+    if (current_block.cost <= stats.titanium) {cost_span.style.color = "lightgreen"}
+    else {cost_span.style.color = "rgb(237, 84, 84)"}
+
+    item_desc.innerHTML = current_block.desc
 }
 
 function init()
@@ -588,8 +604,9 @@ function frame()
     updatePlayer()
     updateStats()
     selectedBlock()
-    draw_tiles()
+    draw_conveyors()
     updateOrbPos()
+    draw_tiles()
     draw_grid()
 
     circleE(g_size / 2, g_size / 2, player.radius, "white")
