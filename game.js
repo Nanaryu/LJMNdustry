@@ -14,17 +14,8 @@ tit.src = "assets/img/item-titanium.png"
 tit.height = 30
 tit.width = 30
 
-const conv1 = new Image()
-conv1.src = "assets/img/conv1.png"
-
-const conv2 = new Image()
-conv2.src = "assets/img/conv2.png"
-
-const conv3 = new Image()
-conv3.src = "assets/img/conv3.png"
-
-const conv4 = new Image()
-conv4.src = "assets/img/conv4.png"
+const conv = new Image()
+conv.src = "assets/img/conv1.png"
 
 const grass = new Image()
 grass.src = "assets/img/grass.png"
@@ -37,7 +28,7 @@ spawn.src = "assets/img/spawner.png"
 
 const stats = 
 {
-    titanium: 100,
+    titanium: 1000,
     power: 8543,
 }
 
@@ -48,74 +39,92 @@ const item_desc =  document.getElementById("item-desc")
 const blocks =
 {
     conveyor: {
-        letter: "D",
-        color: "gray",
         cost: 10,
         name: "conveyor",
-        desc: "Basic conveyor used for material transportation"
+        desc: "Basic conveyor used for material transportation",
+        src: conv,
     },
     freeblock: {
-        letter: "F",
-        color: "darkgreen",
         cost: 0,
         name: "freeblock",
-        desc: "Grass block commonly found on the map"
+        desc: "Grass block commonly found on the map",
+        src: grass,
     },
     spawner: {
-        letter: "P",
-        color: "pink",
         cost: 80,
         name: "spawner",
         desc: "Basic drill used for material mining",
+        src: spawn,
     },
     collector: {
-        letter: "C",
-        color: "lightcoral",
         cost: 10,
         name: "collector",
-        desc: "The core holds all materials that are transported to it"
+        desc: "The core holds all materials that are transported to it",
+        src: coll,
     }
 }
 
-var rotation = 1
+var rotation = 0
 
-/* var rotdecode = {
-    1: "↑",
-    2: "→",
-    3: "↓",
-    4: "←"
-} */
+function drawImageR(image, x, y, angle, width, height) 
+{
+    let radians = 90 * angle * Math.PI / 180
+    c.save()
+    c.translate(x + width / 2, y + height / 2)
+    c.rotate(radians)
+    c.drawImage(image, (-width / 2), (-height / 2), width, height)
+    c.restore()
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const tiles = []
+
+class tile 
+{
+    constructor (x, y, angle, tile, terrain)
+    {
+        this.x = x
+        this.y = y
+        this.tile = tile
+        this.terrain = terrain
+        this.angle = angle
+        this.tile_x = Math.floor(this.x/c_size)
+        this.tile_y = Math.floor(this.y/c_size)
+    }
+
+    update()
+    {
+        if(this.tile != null)
+        {
+            drawImageR(this.tile, this.x - cameraX, this.y - cameraY, this.angle, c_size, c_size)
+        }
+        else
+        {
+            drawImageR(this.terrain, this.x - cameraX, this.y - cameraY, this.angle, c_size, c_size)
+        }
+    }
+}
 
 function velocity(x, y, rot)
 {
     switch(rot)
     {
-        case 1:
+        case 0:
             return [x, y-c_size]
-        case 2:
+        case 1:
             return [x+c_size, y]
-        case 3:
+        case 2:
             return [x, y+c_size]
-        case 4:
+        case 3:
             return [x-c_size, y]
     }
 }
 
-var cells = []
-/* cells = 
-[
-    [
-        [state, rotation],
-    ],
-] */
+const materials = []
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const orbs = []
-
-class Orb 
+class material 
 {
     constructor (x, y, r, dx=x, dy=y, moving=false)
     {
@@ -127,42 +136,29 @@ class Orb
         this.dy = dy
     }
 
-    move_c() 
+    update() 
     {   
         if (!this.moving) 
         {
-            this.cell_x = Math.floor(this.x/c_size)
-            this.cell_y = Math.floor(this.y/c_size)
-
-            if (this.cell_x >= 0 && this.cell_x < cells[0].length && this.cell_y >= 0 && this.cell_y < cells[0].length)
+            this.tile_x = Math.floor(this.x/c_size)
+            this.tile_y = Math.floor(this.y/c_size)
+            tiles.forEach(tile1 =>
             {
-                if (cells[this.cell_x][this.cell_y][0] == "D")
+                if ((this.tile_x == tile1.tile_x && this.tile_y == tile1.tile_y) && tile1.tile == conv)
                 {
-                    let xy = velocity(this.x, this.y, cells[this.cell_x][this.cell_y][1])
-                    this.dx = xy[0]
-                    this.dy = xy[1]
+                    let dxdy = velocity(this.x, this.y, tile1.angle)
+                    this.dx = dxdy[0]
+                    this.dy = dxdy[1]
                     this.moving = true
                 }
-                else if (cells[this.cell_x][this.cell_y][0] == "C")
-                {   
-                    stats.titanium += 1
-                    this.x = null
-                    this.y = null
-                    this.r = null
-                    this.moving = null
-                    this.dx = null
-                    this.dy = null
-                    this.score = null
-                    this.cell_x = null
-                    this.cell_y = null
-                    delete this.cell_x
-                    delete this.cell_y
-                    this.x = 99999
-                    this.y = 99999
-                   
+                else if ((this.tile_x == tile1.tile_x && this.tile_y == tile1.tile_y) && tile1.tile == coll)
+                {
+                    stats.titanium += 100
+                    delete this.x
+                    delete this.y
                 }
-                c.drawImage(tit, this.x-tit.width/2-cameraX, this.y-tit.height/2-cameraY, tit.width, tit.height)
-            }
+            })
+            c.drawImage(tit, this.x-tit.width/2-cameraX, this.y-tit.height/2-cameraY, tit.width, tit.height)
         }
         else
         {
@@ -193,72 +189,48 @@ class Orb
     }
 }
 
-function spawnOrb() 
+function spawnMaterial()
 {
-    let x = 0
-    let y = 0
-
-    for (i = 0; i < g_size; i += c_size) 
+    tiles.forEach(tile1 =>
     {
-        for (j = 0; j < g_size; j += c_size)
+        if (tile1.tile == spawn)
         {
-            let cell = cells[x][y][0]
-            
-            if (cell == "P") {
-                c.fillStyle = "red"
-
-                let ii = (c_size/2)+i
-                let jj = (c_size/2)+j
-
-                if (x + 1 < g_size / c_size)
+            tiles.forEach(tile2 =>
+            {
+                if(tile2.tile == conv)
                 {
-                    if (cells[x+1][y][0] == "D") // right
+                    let x = tile1.x + (c_size/2)
+                    let y = tile1.y + (c_size/2)
+                    let dx = tile2.x + (c_size/2)
+                    let dy = tile2.y + (c_size/2)
+
+                    if(tile1.tile_x + 1 == tile2.tile_x && tile1.tile_y == tile2.tile_y) // right
                     {
-                        orbs.push(new Orb(ii, jj, c_size/8, ii+c_size, jj, true))
-                        stats.power -= 1
+                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                    }
+                    if (tile1.tile_x - 1 == tile2.tile_x && tile1.tile_y == tile2.tile_y) // left
+                    {
+                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                    }
+                    if (tile1.tile_x == tile2.tile_x && tile1.tile_y - 1 == tile2.tile_y) // top
+                    {
+                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                    }
+                    if (tile1.tile_x == tile2.tile_x && tile1.tile_y + 1 == tile2.tile_y) // bottom
+                    {
+                        materials.push(new material(x, y, c_size/8, dx, dy, true))
                     }
                 }
-                
-                if (x != 0)
-                {
-                    if (cells[x-1][y][0] == "D") // left
-                    {
-                        orbs.push(new Orb(ii, jj, c_size/8, ii-c_size, jj, true))
-                        stats.power -= 1
-                    }
-                }
-            
-                if (y + 1 < g_size / c_size)
-                {
-                    if (cells[x][y+1][0] == "D") // down
-                    {
-                        orbs.push(new Orb(ii, jj, c_size/8, ii, jj+c_size, true))
-                        stats.power -= 1
-                    }
-                }
-
-                if (y != 0) 
-                {
-                    if (cells[x][y-1][0] == "D") // up
-                    {
-                        orbs.push(new Orb(ii, jj, c_size/8, ii, jj-c_size, true))
-                        stats.power -= 1
-                    }   
-                }
-            }
-
-            y += 1
+            })
         }
-        y = 0
-        x += 1
-    }
+    })
 }
 
-function updateOrbPos()
+function updateMatPos()
 {
-    orbs.forEach(orb => 
+    materials.forEach(mat => 
     {
-        orb.move_c()
+        mat.update()
     })
 }
 
@@ -289,19 +261,19 @@ var cameraX = player.x - g_size / 2
 var cameraY = player.y - g_size / 2
 
 function updatePlayer() {
-    if (keys["ArrowUp"] || keys["w"]) 
+    if (keys["w"] || keys["W"]) 
     {
         player.y -= player.speed
     }
-    if (keys["ArrowDown"] || keys["s"]) 
+    if (keys["s"] || keys["S"]) 
     {
         player.y += player.speed
     }
-    if (keys["ArrowLeft"] || keys["a"]) 
+    if (keys["a"] || keys["A"]) 
     {
         player.x -= player.speed
     }
-    if (keys["ArrowRight"] || keys["d"]) 
+    if (keys["d"] || keys["D"]) 
     {
         player.x += player.speed
     }
@@ -330,7 +302,7 @@ function createBlock(src, id, onclick) {
 
 createBlock(grass.src, "freeblock", function() {current_block = blocks.freeblock})
 createBlock(spawn.src, "spawner", function() {current_block = blocks.spawner})
-createBlock(conv1.src, "conveyor", function() {current_block = blocks.conveyor})
+createBlock(conv.src, "conveyor", function() {current_block = blocks.conveyor})
 createBlock(coll.src, "collector", function() {current_block = blocks.collector})
 
 const cost_span = document.getElementById("item_requirements")
@@ -404,7 +376,7 @@ function circleE(x, y, radius, style="white")
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function draw_grid() {
+function drawGrid() {
     const expanded_size = g_size + 2 * c_size
 
     const startX = -cameraX % c_size - c_size
@@ -425,105 +397,27 @@ function draw_grid() {
     }
 }
 
-function draw_conveyors()
+function updateTiles()
 {
-    let x = 0
-    let y = 0
-
-    for (i = 0; i < g_size; i += c_size) 
+    tiles.forEach(tile1 =>
     {
-        for (j = 0; j < g_size; j += c_size)
-        {
-            let cell = cells[x][y][0]
-            let rot  = cells[x][y][1]
-
-            let fx = i - cameraX
-            let fy = j - cameraY
-
-            if (cell == "D")
-            {
-                switch(rot)
-                {
-                    case 1: 
-                        c.drawImage(conv1, fx, fy, c_size, c_size)
-                        break
-                    case 2: 
-                        c.drawImage(conv2, fx, fy, c_size, c_size)
-                        break
-                    case 3: 
-                        c.drawImage(conv3, fx, fy, c_size, c_size)
-                        break
-                    case 4: 
-                        c.drawImage(conv4, fx, fy, c_size, c_size)
-                        break
-                }
-            }
-            y += 1
-        }
-        y = 0
-        x += 1
-    }
+        tile1.update()
+    })
 }
 
-function draw_tiles() 
+function selectedBlockOutline()
 {
-    let x = 0
-    let y = 0
-
-    for (i = 0; i < g_size; i += c_size) 
+    let block = select.children
+    for (let i = 0; i < block.length; i++)
     {
-        for (j = 0; j < g_size; j += c_size)
-        {
-            let cell = cells[x][y][0]
-
-            let fx = i - cameraX
-            let fy = j - cameraY
-
-            switch(cell)
-            {
-                default:
-                    break
-                case "F":
-                    {
-                        c.drawImage(grass, fx, fy, c_size, c_size)
-                        break
-                    }
-                case "D":
-                    {   
-                        break
-                    }
-                case "P":
-                    {
-                        c.drawImage(spawn, fx, fy, c_size, c_size)
-                        break
-                    }
-                case "C":
-                    {
-                        c.drawImage(coll, fx, fy, c_size, c_size)
-                        break
-                    }
-            }
-            //text(`[${x}][${y}]`, fx + c_size/2, fy + c_size/2 -3, 14, "black")
-            y += 1
-        }
-        y = 0
-        x += 1
-    }
-}
-
-function selectedBlock()
-{
-    let selchild = select.children
-    for (let i = 0; i < selchild.length; i++)
-    {
-        if (selchild[i].id == current_block.name) {
-            selchild[i].style.outline =  "2px white solid"
-            selchild[i].style.boxShadow = "0 0 10px white"
+        if (block[i].id == current_block.name) {
+            block[i].style.outline =  "2px white solid"
+            block[i].style.boxShadow = "0 0 10px white"
         }
         else
         {
-            selchild[i].style.outline = "none"
-            selchild[i].style.boxShadow = "none"
+            block[i].style.outline = "none"
+            block[i].style.boxShadow = "none"
         }
     }
 }
@@ -544,7 +438,6 @@ function kFormat(value)
         return `${svalue[0]}${svalue[1]}.${svalue[2]}k`
     }
 }
-
 
 function updateStats()
 {
@@ -572,42 +465,23 @@ function updateStats()
 
 function init()
 {
-    if (cells.length == 0) 
+    for (let i = 0; i < g_size; i += c_size) 
     {
-        let x = 0
-        let y = 0
-        let rows = g_size / c_size
-
-        // init cells
-        for (let i = 0; i < rows; i += 1) 
+        for (let j = 0; j < g_size; j += c_size) 
         {
-            cells[i] = []
-        }
-
-        // set all cells to free
-        for (let i = 0; i < g_size; i += c_size) 
-        {
-            for (let j = 0; j < g_size; j += c_size) 
-            {
-                cells[x][y] = ["F", 1]
-                y += 1
-            }
-            y = 0
-            x += 1
+            tiles.push(new tile(i, j, 0, null, grass))
         }
     }
-    //cells = [[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]],[["P",1],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",3],["D",3],["C",1],["D",1],["P",1],["D",3],["C",1],["D",1],["P",1]]]
 }
 
 function frame() 
 {   
     updatePlayer()
     updateStats()
-    selectedBlock()
-    draw_conveyors()
-    updateOrbPos()
-    draw_tiles()
-    draw_grid()
+    selectedBlockOutline()
+    updateTiles()
+    updateMatPos()
+    drawGrid()
 
     circleE(g_size / 2, g_size / 2, player.radius, "white")
 }
@@ -621,28 +495,30 @@ canvas.addEventListener("mousedown", function(e)
 {
     if (e.button === 0 && current_block.cost <= stats.titanium)
     {
-        cell_x = Math.floor((e.offsetX+cameraX)/c_size)
-        cell_y = Math.floor((e.offsetY+cameraY)/c_size)
-
-        if (cells[cell_x][cell_y][0] != current_block.letter || cells[cell_x][cell_y][1] != rotation)
+        let tile_x = Math.floor((e.offsetX+cameraX)/c_size)
+        let tile_y = Math.floor((e.offsetY+cameraY)/c_size)
+        let cell = null
+        tiles.forEach(tile1 =>
         {
-            stats.titanium -= current_block.cost
-            
-            Object.keys(blocks).forEach(key => {
-                if (cells[cell_x][cell_y][0] == blocks[key].letter)
-                {
-                    stats.titanium += blocks[key].cost
-                }
-            })
+            if (tile1.tile_x == tile_x && tile1.tile_y == tile_y)
+            {
+                cell = tile1
+            }
+        })
 
-            cells[cell_x][cell_y] = [current_block.letter, rotation]
-        }
-        
+        stats.titanium -= current_block.cost
+            
+        Object.keys(blocks).forEach(key => {
+            if (cell.tile == blocks[key].src)
+            {
+                stats.titanium += blocks[key].cost
+            }
+        })
+
+        cell.tile = current_block.src
+        cell.angle = rotation
         mouseheld = true
     }
-    
-    //c.fillStyle = current_block.color
-    //c.fillRect(cell_x * c_size, cell_y * c_size, c_size, c_size)
 })
 
 canvas.addEventListener("mouseup", function(e)
@@ -657,64 +533,47 @@ canvas.addEventListener("mousemove", function(e)
 {
     if (mouseheld && current_block.cost <= stats.titanium)
     {
-        cell_x = Math.floor((e.offsetX+cameraX)/c_size)
-        cell_y = Math.floor((e.offsetY+cameraY)/c_size)
-
-        if (cells[cell_x][cell_y][0] != current_block.letter || cells[cell_x][cell_y][1] != rotation)
+        let tile_x = Math.floor((e.offsetX+cameraX)/c_size)
+        let tile_y = Math.floor((e.offsetY+cameraY)/c_size)
+        let cell = null
+        tiles.forEach(tile1 =>
         {
-            stats.titanium -= current_block.cost
+            if (tile1.tile_x == tile_x && tile1.tile_y == tile_y)
+            {
+                cell = tile1
+            }
+        })
 
-            Object.keys(blocks).forEach(key => {
-                if (cells[cell_x][cell_y][0] == blocks[key].letter)
-                {
-                    stats.titanium += blocks[key].cost
-                }
-            })
+        stats.titanium -= current_block.cost
+            
+        Object.keys(blocks).forEach(key => {
+            if (cell.tile == blocks[key].src)
+            {
+                stats.titanium += blocks[key].cost
+            }
+        })
 
-            cells[cell_x][cell_y] = [current_block.letter, rotation]
-        }
+        cell.tile = current_block.src
+        cell.angle = rotation
+        mouseheld = true
     }
 })
 
 var spawnToggle = false
 window.addEventListener("keydown", function (e)
 {
-    if (e.key === "r")
+    if (e.key == "r" || e.key == "R")
     {
-        if (rotation < 4) 
+        if (rotation < 3) 
         {
             rotation++
         } 
         else 
         {
-            rotation = 1
-        }
-        switch (rotation)
-        {
-            case 1:
-            {
-                conveyor.src = conv1.src 
-                break
-            }
-            case 2:
-            {
-                conveyor.src = conv2.src 
-                break
-            }
-            case 3:
-            {
-                conveyor.src = conv3.src 
-                break
-            }
-            case 4:
-            {
-                conveyor.src = conv4.src 
-                break
-            }
-                
+            rotation = 0
         }
     }
-    else if (e.key === "e")
+    else if (e.key == "e" || e.key == "E")
     {
         spawnToggle = spawnToggle ? false : true
     }
@@ -737,56 +596,11 @@ animate()
 setInterval(() => {
     if (stats.power > 0 && spawnToggle)
     {
-        spawnOrb()
+        spawnMaterial()
     }
-    if (stats.power < 100)
-    {
-        stats.power += 1
-    }
+    stats.power += 1
 }, 500)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// block preview, did not work, dont want do to it any more
-
-/* var last_x = 99
-var last_y = 99
-
-canvas.addEventListener("mousemove", function(e) 
-{
-    cell_x = Math.floor(e.offsetX/c_size)
-    cell_y = Math.floor(e.offsetY/c_size)
-
-    let trigger = false
-
-    if ((cell_x > (g_size / c_size - 1)) || (cell_y > (g_size / c_size - 1)))
-    {
-        trigger = true
-    }
-
-    if (((cell_x != last_x) || (cell_y != last_y)) && !trigger) 
-    {
-        let lastCellState = cells[cell_x][cell_y]
-        cells[cell_x][cell_y] = current_block.letter
-
-        last_x = cell_x
-        last_y = cell_y
-
-        c.fillStyle = current_block.color
-
-        for (let i = 0; i < cells.length; i++) 
-        {
-            for (let j = 0; j < cells[i].length; j++)
-            {
-                if (cells[i][j] == current_block.letter && ((i != cell_x) || (j != cell_y)))
-                {
-                    cells[i][j] = lastCellState.letter
-                    update(g_size, c_size)
-                }
-            }
-        }
-    }
-}) */
