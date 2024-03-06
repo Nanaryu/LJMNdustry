@@ -28,7 +28,7 @@ spawn.src = "assets/img/spawner.png"
 
 const stats = 
 {
-    titanium: 1000,
+    titanium: 99999,
     power: 8543,
 }
 
@@ -104,6 +104,7 @@ class tile
         {
             drawImageR(this.terrain, this.x - cameraX, this.y - cameraY, this.angle, c_size, c_size)
         }
+        text(`${this.tile_x},${this.tile_y}`, this.x + c_size/2 - cameraX, this.y + c_size/2 - cameraY, 16, "rgba(233,233,233,0.3)")
     }
 }
 
@@ -126,11 +127,10 @@ const materials = []
 
 class material 
 {
-    constructor (x, y, r, dx=x, dy=y, moving=false)
+    constructor (x, y, dx=x, dy=y, moving=false)
     {
         this.x = x
         this.y = y
-        this.r = r
         this.moving = moving
         this.dx = dx
         this.dy = dy
@@ -206,19 +206,19 @@ function spawnMaterial()
 
                     if(tile1.tile_x + 1 == tile2.tile_x && tile1.tile_y == tile2.tile_y) // right
                     {
-                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                        materials.push(new material(x, y, dx, dy, true))
                     }
                     if (tile1.tile_x - 1 == tile2.tile_x && tile1.tile_y == tile2.tile_y) // left
                     {
-                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                        materials.push(new material(x, y, dx, dy, true))
                     }
                     if (tile1.tile_x == tile2.tile_x && tile1.tile_y - 1 == tile2.tile_y) // top
                     {
-                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                        materials.push(new material(x, y, dx, dy, true))
                     }
                     if (tile1.tile_x == tile2.tile_x && tile1.tile_y + 1 == tile2.tile_y) // bottom
                     {
-                        materials.push(new material(x, y, c_size/8, dx, dy, true))
+                        materials.push(new material(x, y, dx, dy, true))
                     }
                 }
             })
@@ -372,6 +372,15 @@ function circleE(x, y, radius, style="white")
     c.closePath()
 }
 
+function rect(x, y, w, h, style="white")
+{
+    c.beginPath()
+    c.fillStyle = style
+    c.fillRect(x, y, w, h)
+    c.fill()
+    c.closePath()
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -463,11 +472,63 @@ function updateStats()
     item_desc.innerHTML = current_block.desc
 }
 
+function mouseEvents()
+{
+    let mtile_x = Math.floor((mouse.x+cameraX)/c_size)
+    let mtile_y = Math.floor((mouse.y+cameraY)/c_size)
+
+    var stx
+    var sty
+
+    var etx
+    var ety
+
+    if(mouseheld && current_block.cost <= stats.titanium)
+    {
+        let cell = null
+        tiles.forEach(tile1 =>
+        {
+            if (tile1.tile_x == mtile_x && tile1.tile_y == mtile_y)
+            {
+                cell = tile1
+            }
+        })
+
+        stats.titanium -= current_block.cost
+            
+        Object.keys(blocks).forEach(key => {
+            if (cell.tile == blocks[key].src)
+            {
+                stats.titanium += blocks[key].cost
+            }
+        })
+
+        cell.tile = current_block.src
+        cell.angle = rotation
+    }
+    
+    else if (rmouseheld)
+    {
+        stx = startcoords.x 
+        sty = startcoords.y
+
+        etx = mouse.x
+        ety = mouse.y
+
+        /* line(stx, sty, stx, ety, "red")
+        line(stx, sty, etx, sty, "red")
+        line(etx, sty, etx, ety, "red")
+        line(stx, ety, etx, ety, "red")
+ */
+        //rect(stx - cameraX, sty - cameraY, etx, ety, "rgba(233, 0, 0, 0.3)")
+    }
+}
+
 function init()
 {
-    for (let i = 0; i < g_size; i += c_size) 
+    for (let i = -(c_size*15); i < c_size*16; i += c_size) 
     {
-        for (let j = 0; j < g_size; j += c_size) 
+        for (let j = -(c_size*15); j < c_size*16; j += c_size) 
         {
             tiles.push(new tile(i, j, 0, null, grass))
         }
@@ -479,8 +540,10 @@ function frame()
     updatePlayer()
     updateStats()
     selectedBlockOutline()
+
     updateTiles()
     updateMatPos()
+    mouseEvents()
     drawGrid()
 
     circleE(g_size / 2, g_size / 2, player.radius, "white")
@@ -491,72 +554,56 @@ function frame()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var mouseheld = false
+var rmouseheld = false
+
+var startcoords = 
+{
+    x: null,
+    y: null,
+}
+
+var mouse =
+{
+    x: null,
+    y: null,
+}
+
 canvas.addEventListener("mousedown", function(e)
 {
-    if (e.button === 0 && current_block.cost <= stats.titanium)
+    if (e.button === 0) // left click
     {
-        let tile_x = Math.floor((e.offsetX+cameraX)/c_size)
-        let tile_y = Math.floor((e.offsetY+cameraY)/c_size)
-        let cell = null
-        tiles.forEach(tile1 =>
-        {
-            if (tile1.tile_x == tile_x && tile1.tile_y == tile_y)
-            {
-                cell = tile1
-            }
-        })
-
-        stats.titanium -= current_block.cost
-            
-        Object.keys(blocks).forEach(key => {
-            if (cell.tile == blocks[key].src)
-            {
-                stats.titanium += blocks[key].cost
-            }
-        })
-
-        cell.tile = current_block.src
-        cell.angle = rotation
+        mouse.x = e.offsetX
+        mouse.y = e.offsetY
         mouseheld = true
+    }
+    else if (e.button === 2) // right click
+    {
+        mouse.x = e.offsetX
+        mouse.y = e.offsetY
+        startcoords.x = e.offsetX
+        startcoords.y = e.offsetY
+        rmouseheld = true
     }
 })
 
+var rmouseup = false
 canvas.addEventListener("mouseup", function(e)
 {
     if (e.button === 0)
     {
         mouseheld = false
     }
+    else if (e.button === 2)
+    {
+        rmouseup = true
+        rmouseheld = false
+    }
 })
 
 canvas.addEventListener("mousemove", function(e)
 {
-    if (mouseheld && current_block.cost <= stats.titanium)
-    {
-        let tile_x = Math.floor((e.offsetX+cameraX)/c_size)
-        let tile_y = Math.floor((e.offsetY+cameraY)/c_size)
-        let cell = null
-        tiles.forEach(tile1 =>
-        {
-            if (tile1.tile_x == tile_x && tile1.tile_y == tile_y)
-            {
-                cell = tile1
-            }
-        })
-
-        stats.titanium -= current_block.cost
-            
-        Object.keys(blocks).forEach(key => {
-            if (cell.tile == blocks[key].src)
-            {
-                stats.titanium += blocks[key].cost
-            }
-        })
-
-        cell.tile = current_block.src
-        cell.angle = rotation
-        mouseheld = true
-    }
+    mouse.x = e.offsetX
+    mouse.y = e.offsetY
 })
 
 var spawnToggle = false

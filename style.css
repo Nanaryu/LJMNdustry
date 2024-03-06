@@ -142,4 +142,5 @@ canvas
     position: relative;
     border-radius: 15px;
     outline: 2px rgba(233,233,233,0.3) solid;
+    user-select: none;
 }
