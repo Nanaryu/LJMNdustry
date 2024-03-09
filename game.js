@@ -134,6 +134,8 @@ class material
         this.moving = moving
         this.dx = dx
         this.dy = dy
+        this.tile_x = null
+        this.tile_y = null
     }
 
     update() 
@@ -156,6 +158,11 @@ class material
                     stats.titanium += 100
                     delete this.x
                     delete this.y
+                    delete this.moving
+                    delete this.dx
+                    delete this.dy
+                    delete this.tile_x
+                    delete this.tile_y
                 }
             })
             c.drawImage(tit, this.x-tit.width/2-cameraX, this.y-tit.height/2-cameraY, tit.width, tit.height)
@@ -509,18 +516,26 @@ function mouseEvents()
     
     else if (rmouseheld)
     {
-        stx = startcoords.x 
-        sty = startcoords.y
+        stx = startcoords.x - cameraX
+        sty = startcoords.y - cameraY
 
-        etx = mouse.x
-        ety = mouse.y
+        etx = mouse.x - cameraX
+        ety = mouse.y - cameraY
 
         /* line(stx, sty, stx, ety, "red")
         line(stx, sty, etx, sty, "red")
         line(etx, sty, etx, ety, "red")
-        line(stx, ety, etx, ety, "red")
- */
-        //rect(stx - cameraX, sty - cameraY, etx, ety, "rgba(233, 0, 0, 0.3)")
+        line(stx, ety, etx, ety, "red") */
+       
+        //rect(Math.min(stx, etx), Math.min(sty, ety), Math.abs(etx - stx), Math.abs(ety - sty), "rgba(233, 0, 0, 0.3)")
+    }
+
+    else
+    {
+        c.save()
+        c.globalAlpha = 0.5
+        drawImageR(current_block.src, mtile_x*c_size-cameraX, mtile_y*c_size-cameraY, rotation, c_size, c_size)
+        c.restore()
     }
 }
 
